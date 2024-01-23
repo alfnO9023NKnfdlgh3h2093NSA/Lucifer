@@ -1,0 +1,625 @@
+for i, bot in pairs(getBots()) do
+    if getBot().name:upper() == bot.name:upper() then
+        indexbot = i
+    end
+end
+
+getBot().auto_reconnect = false
+worlds = {}
+infoid = {}
+local setting = {}
+local params ={
+    dropitems = 1,
+    takeitems = 1
+}
+str = ""
+index = 1
+local tileDrop = 0
+dropX = posX - 1
+dropY = posY - 1
+
+findItem = function(id)
+    return getBot():getInventory():getItemCount(id)
+end
+
+place = function(id,ex,ye)
+    getBot():place(getBot().x+ex,getBot().y+ye,id)
+end
+
+collect = function(int)
+    getBot():collect(int)
+end
+
+punch = function(ex,ye)
+    getBot():hit(getBot().x+ex,getBot().y+ye)
+end
+
+drop = function(id)
+    getBot():drop(id,200)
+end
+
+move = function(x,y)
+    getBot():moveTo(x,y)
+end
+
+findPath = function(x,y)
+    getBot():findPath(x,y)
+end
+
+sendPacket = function(str,int)
+    return getBot():sendPacket(int,str)
+end
+
+setting.splitt = function(str, ptr)
+    if not ptr then 
+        ptr = "%s"
+    end
+    local tbl = {}
+    for string in string.gmatch(str, ptr) do
+        table.insert(tbl, string) 
+    end
+    return tbl
+end
+
+setting.getEnetBot = function()
+    strings = ""
+    for i, list in pairs(getBots()) do
+        if list.status == BotStatus.online then
+            Status = "Online"
+        elseif list.status == BotStatus.account_banned  then
+            Status = "Suspended"
+        elseif list.status == BotStatus.error_connecting  then
+            Status = "Ercon"
+        else
+            Status = "Disconnect"
+        end
+        strings = strings.."\n"..Status.."" 
+    end
+    return strings
+end
+
+setting.botstatus = function()
+    strings = ""
+    for _, bot in pairs(getBots()) do
+        strings = strings.."\n["..bot.level.."]"..string.upper(bot.name).."" 
+    end
+    return strings
+end
+
+setting.botworld = function()
+    strings = ""
+    for _, bots in pairs(getBots()) do
+        strings = strings.."\n"..string.upper(bots:getWorld().name).."" 
+    end
+    return strings
+end
+
+setting.botnotif = function()
+    str = ""
+    for _, bot in pairs(getBots()) do
+        str = str.."\n"..""..(string.upper(bot.status)).."" 
+    end
+    return str
+end
+
+setting.takename = function()
+    str = ""
+    for i = 1, #storagetake do
+        str = str.."\nStorage Take - "..i.." : "..(infoid[storagetake[i]] or "Undefined")..""
+    end
+    return str
+end
+
+setting.dropname = function()
+    str = ""
+    for i = 1, #storagedrop do
+        str = str.."\nStorage drop - "..i.." : "..(infoid[storagedrop[i]] or "undefined")..""
+    end
+    return str
+end
+
+setting.itemFloat = function(id)
+    return getBot():getWorld().growscan:getObjects()[id] or 0
+end
+
+setting.webhookinfo = function()
+	if botinfo then
+        local text = [[
+            $webHookUrl = "]]..linkbotinfo..[[/messages/]]..messageidbotinfo..[["
+            $payload = @{
+                username = "Caramoy's"
+                embeds = @(
+                    @{
+                        title = "BOT STATICS"
+                        color = "]]..math.random(111111,999999)..[["
+                        fields = @(
+                            @{
+                                name = "GrowID"
+                                value = "]]..setting.botstatus()..[["
+                                inline = "true"
+                            }
+                            @{
+                                name = "WORLD"
+                                value = "]]..setting.botworld()..[["
+                                inline = "true"
+                            }
+                            @{
+                                name = "STATUS"
+                                value = "]]..setting.getEnetBot()..[["
+                                inline = "true"
+                            }
+                        )
+                        footer = @{
+                            text = "Move WTW Script`n[Lucifer] Caramoy's`nLast update : ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[["
+                        }
+                    }
+                )
+            }
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Invoke-RestMethod -Uri $webHookUrl -Body ($payload | ConvertTo-Json -Depth 4) -Method Patch -ContentType 'application/json'
+        ]]
+        local pipe = io.popen("powershell -command -", "w")
+        pipe:write(text)
+        pipe:close()
+    end
+end
+
+setting.storageinfo = function()
+	if infostorage then
+        local text = [[
+            $webHookUrl = "]]..linkinfostorage..[[/messages/]]..messageidinfostorage..[["
+            $payload = @{
+                username = "Caramoy's"
+                embeds = @(
+                    @{
+                        title = "STORAGE STATICS"
+                        color = "]]..math.random(111111,999999)..[["
+                        fields = @(
+                            @{
+                                name = ""
+                                value = "]]..setting.takename()..[["
+                                inline = "true"
+                            }
+                            @{
+                                name = ""
+                                value = "]]..setting.dropname()..[["
+                                inline = "true"
+                            }
+                        )
+                        footer = @{
+                            text = "Move WTW Script`n[Lucifer] Caramoy's`nLast update : ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[["
+                        }
+                    }
+                )
+            }
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Invoke-RestMethod -Uri $webHookUrl -Body ($payload | ConvertTo-Json -Depth 4) -Method Patch -ContentType 'application/json'
+        ]]
+        local pipe = io.popen("powershell -command -", "w")
+        pipe:write(text)
+        pipe:close()
+    end
+end
+
+setting.botinfo = function(text)
+    if webhookstatus then
+        text = [[
+            $webHookUrl = "]]..webhookstatuslink..[["
+            $payload = @{
+                content = "]]..text..[["
+            }
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Invoke-RestMethod -Uri $webHookUrl -Body ($payload | ConvertTo-Json -Depth 4) -Method Post -ContentType "application/json"
+        ]]
+        local file = io.popen("powershell -command -", "w")
+        file:write(text)
+        file:close()
+    end
+end
+
+setting.reconnect = function(world,id,x,y)
+    if getBot():getPing() == 0 then
+        getBot():disconnect()
+        sleep(4000)
+    end
+    if not getBot():isInWorld(world:upper()) and getBot().status == BotStatus.online then 
+        setting.botinfo("[ "..getBot().name.." ] at another world, trying to joining world again @everyone")
+        local count = 0
+        while not getBot():isInWorld(world:upper()) do
+            sendPacket("action|join_request\nname|"..world:upper().."\ninvitedWorld|0",3)
+            sleep(delaywarp)
+            if not getBot():isInWorld(world:upper()) then 
+                count = count + 1
+                if count > 5 then
+                    setting.botinfo("[ "..getBot().name.." ] Failed to joining world again, terminated script @everyone")
+                    getBot():stopScript()
+                end
+            end
+        end
+        if id ~= "" then
+            local stucks = 0
+            while getTile(getBot().x,getBot().y).fg == 6 do
+                sendPacket("action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0",3)
+                sleep(delaywarp)
+                if stucks > 3 then
+                    setting.botinfo("[ "..getBot().name.." ] Failed to reconnecting bot, stuck at white door. Terminated script @everyone")
+                    getBot():stopScript()
+                end
+            end
+        end
+        if x and y then
+            while getBot().x ~= x or getBot().y ~= y do
+                findPath(x,y)
+                sleep(150)
+            end
+        end
+        setting.botinfo("[ "..getBot().name.." ] success to joining world @everyone")
+    end
+    if getBot().status ~= BotStatus.online then
+        setting.botinfo("[ "..getBot().name.." ] status is offline @everyone")
+        while getBot().status ~= BotStatus.online do
+            getBot():connect()
+            sleep(delayreconnect)
+            if getBot().status == BotStatus.account_banned then
+                setting.botinfo("[ "..getBot().name.." ] status is suspended, removing bot @everyone")
+                getBot():stopScript()
+            end
+        end
+        local counts = 0
+        while not getBot():isInWorld(world:upper()) do
+            sendPacket("action|join_request\nname|"..world:upper().."\ninvitedWorld|0",3)
+            sleep(delaywarp)
+            if not getBot():isInWorld(world:upper()) then 
+                counts = counts + 1
+                if counts > 5 then
+                    setting.botinfo("[ "..getBot().name.." ] Failed to joining world again, terminated script @everyone")
+                    getBot():stopScript()
+                end
+            end
+        end
+        if id ~= "" then
+            local stuckk = 0
+            while getTile(getBot().x,getBot().y).fg == 6 do
+                sendPacket("action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0",3)
+                sleep(delaywarp)
+                if stuckk > 3 then
+                    setting.botinfo("[ "..getBot().name.." ] Failed to reconnecting bot, stuck at white door. Terminated script @everyone")
+                    getBot():stopScript()
+                end
+            end
+        end
+        if x and y then
+            while getBot().x ~= x or getBot().y ~= y do
+                findPath(x,y)
+                sleep(150)
+            end
+        end
+        setting.botinfo("[ "..getBot().name.." ] status is online @everyone")
+    end
+    if getTile(getBot().x,getBot().y).fg == 6 then
+        setting.botinfo("[ "..getBot().name.." ] Stuck at white door ! @everyone")
+        local stuck = 0
+        if id ~= "" then
+            while getTile(getBot().x,getBot().y).fg == 6 do
+                sendPacket("action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0",3)
+                sleep(delaywarp)
+                if stuck > 3 then
+                    setting.botinfo("[ "..getBot().name.." ] Failed to reconnecting bot, stuck at white door. Terminated script @everyone")
+                end
+            end
+        end
+        if x and y then
+            while getBot().x ~= x or getBot().y ~= y do
+                findPath(x,y)
+                sleep(150)
+            end
+        end
+        setting.botinfo("[ "..getBot().name.." ] Already back to pos ! @everyone")
+    end
+end
+
+setting.warp = function(world,door,cooldown)
+    name = world
+    if door ~= "" then
+        name = name .. "|" ..door
+    end
+    if not getBot():isInWorld(world:upper()) then
+        addEvent(Event.variantlist, function(variant, netid)
+            if variant:get(0):getString() == "OnConsoleMessage" then
+                if variant:get(1):getString():lower():find("inaccessible.") then
+                    nuked = true
+                end
+                if variant:get(1):getString():lower():find("experiencing ") then
+                    subserver = true
+                end
+            end
+        end)
+        while not getBot():isInWorld(world:upper()) and not nuked and not subserver do
+            if getBot():getPing() == 0 then
+                getBot():disconnect()
+                sleep(2000)
+            end
+            while getBot().status ~= BotStatus.online do
+                getBot():connect()
+                sleep(delayreconnect)
+                if getBot().status == BotStatus.account_banned then
+                    setting.botinfo("[ "..getBot().name.." ] status is suspended, removing bot @everyone")
+                    getBot():stopScript()
+                end
+            end
+            sendPacket("action|join_request\nname|"..name.."\ninvitedWorld|0",3)
+            listenEvents(8)
+            sleep(cooldown)
+        end
+        removeEvents()
+        sleep(2000)
+    end
+    if getBot():isInWorld(world:upper()) then
+        if door ~= "" then
+            local stuck = 0
+            while getTile(getBot().x,getBot().y).fg == 6 and not wrong do
+                if getBot():getPing() == 0 then
+                    getBot():disconnect()
+                    sleep(4000)
+                end
+                while getBot().status ~= BotStatus.online do
+                    getBot():connect()
+                    sleep(delayreconnect)
+                    if getBot().status == BotStatus.account_banned then
+                        setting.botinfo("[ "..getBot().name.." ] status is suspended, removing bot @everyone")
+                        getBot():stopScript()
+                    end
+                end
+                sendPacket("action|join_request\nname|"..name.."\ninvitedWorld|0",3)
+                sleep(cooldown)
+                stuck = stuck + 1
+                if stuck == 5 then
+                    wrong = true
+                end
+            end
+        end
+        for i, tile in pairs(getBot():getWorld():getTiles()) do
+            if tile:hasFlag(4096) then
+                fire = true
+            end
+        end
+    end
+end
+
+setting.storingitems = function()
+    for i = params.dropitems , #storagedrop do
+        ::Here::
+        print("["..indexbot.."]Dropping items")
+        world = storagedrop[i]
+        setting.warp(world,doorstoragedrop)
+        setting.webhookinfo()
+        if not subserver then
+            if not nuked then
+                if not wrong then
+                    if setting.itemFloat(itemId[1]) >= limit then
+                        infoid[world] = "["..setting.itemFloat(itemId[1]).."] LIMIT !!!"
+                        setting.botinfo("Drop storage : "..world.." has reached limit, skipped world @everyone")
+                        print("["..indexbot.."]Drop storage : "..world.."  has reached limit, skipped world")
+                        params.dropitems = params.dropitems + 1
+                        if params.dropitems > #storagedrop then
+                            infoid[world] = "["..setting.itemFloat(itemId[1]).."] LIMIT !!!"
+                            setting.botinfo("All drop storage has reached limit, Removing bot : [ ||"..getBot().name.."|| ] @everyone")
+                            print("["..indexbot.."]All drop storage has reached limit, Removing bot : [ "..getBot().name.." ]")
+                            if removingbot then
+                                removeBot()
+                                sleep(2000)
+                            end
+                            getBot():stopScript()
+                        end
+                        tileDrop = 0
+                    else
+                        for y,pack in pairs(itemId) do
+                            for i,tile in pairs(getBot():getWorld():getTiles()) do
+                                if separated then
+                                    if tile.fg == 0 or tile.bg == 0 then
+                                        ::BACK::
+                                        findPath(dropX + (tileDrop),dropY - (y-1))
+                                        sleep(1000)
+                                        local count = 0
+                                        setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
+                                        if dropX + (tileDrop) >= 98 then
+                                            dropY = dropY - 1
+                                            tileDrop = 0
+                                        end
+                                        while findItem(pack) > 0 do
+                                            drop(pack)
+                                            sleep(delaydrop)
+                                            setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
+                                            count = count + 1
+                                            if count >= 2 then
+                                                tileDrop = tileDrop + 1
+                                                goto BACK
+                                            end
+                                        end
+                                    end
+                                else
+                                    if tile.fg == 0 or tile.bg == 0 then
+                                        ::BACK::
+                                        findPath(dropX + (tileDrop),dropY)
+                                        sleep(1000)
+                                        local count = 0
+                                        setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
+                                        if dropX + (tileDrop) >= 98 then
+                                            dropY = dropY - 1
+                                            tileDrop = 0
+                                        end
+                                        while findItem(pack) > 0 do
+                                            drop(pack)
+                                            sleep(delaydrop)
+                                            setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
+                                            count = count + 1
+                                            if count >= 2 then
+                                                tileDrop = tileDrop + 1
+                                                goto BACK
+                                            end
+                                        end
+                                    end
+                                end
+                                if findItem(pack) == 0 then
+                                    break
+                                end
+                            end
+                        end
+                        sleep(100)
+                        break
+                    end
+                else
+                    infoid[world] = "WRONG DOOR !!!"
+                    wrong = false
+                    sleep(5000)
+                    print("["..indexbot.."][ "..world.." ] Id door drop storage is wrong, check ur id door!")
+                    setting.botinfo("[ ||"..world.."|| ] Id door drop storage is wrong, check ur id door! @everyone")
+                    params.dropitems = params.dropitems + 1
+                    if params.dropitems > #storagedrop then
+                        print("["..indexbot.."]All drop storage has reached limit")
+                        setting.botinfo("All drop storage has reached limit! Removing bot : [ ||"..getBot().name.."|| ] @everyone")
+                        if removingbot then
+                            removeBot()
+                            sleep(2000)
+                        end
+                        getBot():stopScript()
+                    end
+                    tileDrop = 0
+                end
+            else
+                infoid[world] = "NUKED !!!"
+                nuked = false
+                sleep(5000)
+                print("["..indexbot.."][ "..world.." ] drop Storage is NUKED, check ur storage!")
+                setting.botinfo("[ "..world.." ] drop Storage is NUKED, check ur storage! @everyone")
+                params.dropitems = params.dropitems + 1
+                if params.dropitems > #storagedrop then
+                    print("["..indexbot.."]All drop storage has reached limit!")
+                    setting.botinfo("All drop storage has reached limit! Removing bot : [ ||"..getBot().name.."|| ] @everyone")
+                    if removingbot then
+                        removeBot()
+                        sleep(2000)
+                    end
+                    getBot():stopScript()
+                end
+                tileDrop = 0
+            end
+        else
+            subserver = false
+            sleep(5000)
+            print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
+            setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
+            sleep(120000)
+            goto Here
+        end
+    end
+    infoid[world] = "["..setting.itemFloat(itemId[1]).."]"
+    setting.storageinfo()
+end
+
+setting.takestorage = function()
+    for i = params.takeitems, #storagetake do
+        ::Here::
+        print("["..indexbot.."]Taking items")
+        world = storagetake[i]
+        setting.warp(world,doorstoragetake)
+        setting.webhookinfo()
+        if not subserver then
+            if not nuked then
+                if not wrong then
+                    if setting.itemFloat(itemId[1]) == 0 and not looping then
+                        infoid[world] = "["..setting.itemFloat(itemId[1]).."] EMPTY !!!"
+                        setting.botinfo("Take storage : [ ||"..world.."|| ] has empty, skipped world @everyone")
+                        print("["..indexbot.."]Take storage : [ "..world.." ] has empty, skipped world")
+                        params.takeitems = params.takeitems + 1
+                        if params.takeitems > #storagetake then
+                            infoid[world] = "["..setting.itemFloat(itemId[1]).."] EMPTY !!!"
+                            setting.botinfo("All take storage has empty, Removing bot : [ ||"..getBot().name.."|| ] @everyone")
+                            print("["..indexbot.."]All take storage has empty, Removing bot : [ "..getBot().name.." ]")
+                            if removingbot then
+                                removeBot()
+                                sleep(2000)
+                            end
+                            getBot():stopScript()
+                        end
+                    else
+                        for _, pack in pairs(itemId) do
+                            while findItem(pack) == 0 do
+                                for _, object in pairs(getBot():getWorld():getObjects()) do
+                                    if object.id == pack then
+                                        findPath(math.floor((object.x)/32), math.floor((object.y)/32))
+                                        sleep(1000)
+                                        collect(3)
+                                        sleep(1000)
+                                        setting.reconnect(world,doorstoragetake,math.floor((object.x)/32), math.floor((object.y)/32))
+                                    end
+                                    if findItem(pack) > 0 then
+                                        break
+                                    end
+                                end
+                                if looping then
+                                    sleep(5000)
+                                end
+                            end
+                        end
+                        sleep(100)
+                        break
+                    end
+                else
+                    infoid[world] = "WRONG DOOR !!!"
+                    wrong = false
+                    sleep(5000)
+                    print("["..indexbot.."][ "..world.." ] Id door take storage is wrong, check ur id door!")
+                    setting.botinfo("[ ||"..world.."|| ] Id door take storage is wrong, check ur id door! @everyone")
+                    params.takeitems = params.takeitems + 1
+                    if params.takeitems > #storagetake then
+                        print("["..indexbot.."]All take storage has empty")
+                        setting.botinfo("All take storage has empty! Removing bot : [ ||"..getBot().name.."|| ] @everyone")
+                        if removingbot then
+                            removeBot()
+                            sleep(2000)
+                        end
+                        getBot():stopScript()
+                    end
+                end
+            else
+                infoid[world] = "NUKED !!!"
+                nuked = false
+                sleep(5000)
+                print("["..indexbot.."][ "..world.." ] take Storage is NUKED, check ur storage!")
+                setting.botinfo("[ "..world.." ] take Storage is NUKED, check ur storage! @everyone")
+                params.takeitems = params.takeitems + 1
+                if params.takeitems > #storagetake then
+                    print("["..indexbot.."]All take storage has empty!")
+                    setting.botinfo("All take storage has empty! Removing bot : [ ||"..getBot().name.."|| ] @everyone")
+                    if removingbot then
+                        removeBot()
+                        sleep(2000)
+                    end
+                    getBot():stopScript()
+                end
+            end
+        else
+            subserver = false
+            sleep(5000)
+            print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
+            setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
+            sleep(120000)
+            goto Here
+        end
+    end
+    infoid[world] = "["..setting.itemFloat(itemId[1]).."]"
+    setting.storageinfo()
+end
+
+if Information == "Script made by Caramoy's Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq" then
+    setting.webhookinfo()
+    setting.storageinfo()
+    while true do
+        setting.takestorage()
+        setting.storingitems()
+    end
+else
+    print("["..indexbot.."]Script made by Caramoy's Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq")
+    setting.botinfo("Script made by Caramoy's Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq")
+end
