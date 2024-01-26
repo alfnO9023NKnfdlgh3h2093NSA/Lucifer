@@ -399,6 +399,7 @@ setting.storingitems = function()
                             infoid[world] = ""..setting.itemFloat(itemId[1]).."x (LIMIT)"
                             setting.botinfo("All drop storage has reached limit, Removing bot : ("..getBot().name..") @everyone")
                             print("["..indexbot.."]All drop storage has reached limit, Removing bot : ("..getBot().name..")")
+                            setting.webhookinfo()
                             if removingbot then
                                 removeBot()
                                 sleep(2000)
@@ -529,6 +530,7 @@ setting.takestorage = function()
                             infoid[world] = ""..setting.itemFloat(itemId[1]).."x (EMPTY)"
                             setting.botinfo("All take storage has empty, Removing bot : ("..getBot().name..") @everyone")
                             print("["..indexbot.."]All take storage has empty, Removing bot : ("..getBot().name..")")
+                            setting.webhookinfo()
                             if removingbot then
                                 removeBot()
                                 sleep(2000)
