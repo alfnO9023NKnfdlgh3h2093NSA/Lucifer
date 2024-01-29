@@ -645,7 +645,7 @@ setting.main = function()
 end
 
 setting.setauth = function()
-    if indexbot == 1 and withproxy then
+    if not indexbot and withproxy then
         getProxyManager():setLimit(botperproxy)
         for _, lists in pairs(proxyList) do
             getProxyManager():addProxy(lists)
