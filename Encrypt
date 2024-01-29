@@ -663,6 +663,7 @@ if Information == "Script Move WTW made by Caramoy Syndicate, Link Server : http
         getBot():connect()
         sleep(delayreconnect)
     end
+    sleep(indexbot * delayexecute)
     while true do
         setting.takestorage()
         setting.storingitems()
