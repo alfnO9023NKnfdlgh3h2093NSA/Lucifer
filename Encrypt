@@ -99,7 +99,7 @@ end
 setting.botstatus = function()
     strings = ""
     for _, bot in pairs(getBots()) do
-        strings = strings.."\n["..bot.level.."]"..string.upper(bot.name).."" 
+        strings = strings.."\n["..bot.level.."]||"..string.upper(bot.name).."||" 
     end
     return strings
 end
@@ -107,7 +107,7 @@ end
 setting.botworld = function()
     strings = ""
     for _, bots in pairs(getBots()) do
-        strings = strings.."\n"..string.upper(bots:getWorld().name).."" 
+        strings = strings.."\n||"..string.upper(bots:getWorld().name).."||" 
     end
     return strings
 end
@@ -115,7 +115,7 @@ end
 setting.takename = function()
     str = ""
     for i = 1, #storagetake do
-        str = str.."\n"..string.upper(storagetake[i]).." : "..(infoid[storagetake[i]] or "?")..""
+        str = str.."\n||"..string.upper(storagetake[i]).."|| : "..(infoid[storagetake[i]] or "?")..""
     end
     return str
 end
@@ -123,7 +123,7 @@ end
 setting.dropname = function()
     str = ""
     for i = 1, #storagedrop do
-        str = str.."\n"..string.upper(storagedrop[i]).." : "..(infoid[storagedrop[i]] or "?")..""
+        str = str.."\n||"..string.upper(storagedrop[i]).."|| : "..(infoid[storagedrop[i]] or "?")..""
     end
     return str
 end
@@ -144,11 +144,6 @@ setting.webhookinfo = function()
                         color = "]]..math.random(111111,999999)..[["
                         fields = @(
                             @{
-                                name = "BOTS & STORAGE STATICS :"
-                                value = "]]..""..[["
-                                inline = "false"
-                            }
-                            @{
                                 name = "BOTNAME"
                                 value = "]]..setting.botstatus()..[["
                                 inline = "true"
@@ -163,10 +158,6 @@ setting.webhookinfo = function()
                                 value = "]]..setting.getEnetBot()..[["
                                 inline = "true"
                             }
-                        )
-                    }
-                    @{
-                        fields = @(
                             @{
                                 name = "STORAGE TAKE"
                                 value = "]]..setting.takename()..[["
@@ -645,6 +636,20 @@ setting.main = function()
 end
 
 setting.setauth = function()
+    if not indexbot and proxyServerDatabase then
+        getProxyManager().custom_http_proxy = true
+        getProxyManager().http_cooldown = delayDataBase
+        if useDatabaseForMainProxy then
+            getProxyManager().use_main_ip = true -- Use Main IP in Data Proxy Tab.
+        end
+        if setDatabaseType == "http" then
+            addDataProxy(proxyDatabase, Proxy.http) 
+        elseif setDatabaseType == "https" then
+            addDataProxy(proxyDatabase, Proxy.https)
+        elseif setDatabaseType == "socks" then
+            addDataProxy(proxyDatabase, Proxy.socks5)
+        end
+    end
     if not indexbot and withproxy then
         getProxyManager():setLimit(botperproxy)
         for _, lists in pairs(proxyList) do
@@ -653,7 +658,7 @@ setting.setauth = function()
     end
 end
 
-if Information == "Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq" then
+if Information == "Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq" and scriptVersion == "0.1" then
     setting.setauth()
     if autologin and not indexbot then
         setting.main()
