@@ -368,11 +368,11 @@ end
 
 setting.storingitems = function()
     for i = params.dropitems , #storagedrop do
-        ::Here::
         print("["..indexbot.."]Dropping items")
         world = storagedrop[i]
         setting.warp(world,doorstoragedrop)
         setting.webhookinfo()
+        ::Here::
         if not subserver then
             if not nuked then
                 if not wrong then
@@ -491,6 +491,7 @@ setting.storingitems = function()
             print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
             setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
             sleep(120000)
+            setting.reconnect(world,doorstoragedrop)
             goto Here
         end
     end
@@ -499,11 +500,11 @@ end
 
 setting.takestorage = function()
     for i = params.takeitems, #storagetake do
-        ::Here::
         print("["..indexbot.."]Taking items")
         world = storagetake[i]
         setting.warp(world,doorstoragetake)
         setting.webhookinfo()
+        ::Here::
         if not subserver then
             if not nuked then
                 if not wrong then
@@ -602,6 +603,7 @@ setting.takestorage = function()
             print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
             setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
             sleep(120000)
+            setting.reconnect(world,doorstoragetake)
             goto Here
         end
     end
