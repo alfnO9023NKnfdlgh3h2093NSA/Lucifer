@@ -74,11 +74,6 @@ findPath = function(x,y)
     getBot():findPath(x,y)
 end
 
-sendPacket = function(str,int)
-    return getBot():sendPacket(int,str)
-end
-
-
 setting.getEnetBot = function()
     strings = ""
     for i, list in pairs(getBots()) do
@@ -211,7 +206,7 @@ setting.reconnect = function(world,id,x,y)
         setting.botinfo("("..getBot().name..") at another world, trying to joining world again @everyone")
         local count = 0
         while not getBot():isInWorld(world:upper()) do
-            sendPacket("action|join_request\nname|"..world:upper().."\ninvitedWorld|0",3)
+            getBot():sendPacket(3,"action|join_request\nname|"..world:upper().."\ninvitedWorld|0")
             sleep(delaywarp)
             if not getBot():isInWorld(world:upper()) then 
                 count = count + 1
@@ -224,7 +219,7 @@ setting.reconnect = function(world,id,x,y)
         if id ~= "" then
             local stucks = 0
             while getTile(getBot().x,getBot().y).fg == 6 do
-                sendPacket("action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0",3)
+                getBot():sendPacket(3,"action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0")
                 sleep(delaywarp)
                 if stucks > 3 then
                     setting.botinfo("("..getBot().name..") Failed to reconnecting bot, stuck at white door. Terminated script @everyone")
@@ -252,7 +247,7 @@ setting.reconnect = function(world,id,x,y)
         end
         local counts = 0
         while not getBot():isInWorld(world:upper()) do
-            sendPacket("action|join_request\nname|"..world:upper().."\ninvitedWorld|0",3)
+            getBot():sendPacket(3,"action|join_request\nname|"..world:upper().."\ninvitedWorld|0")
             sleep(delaywarp)
             if not getBot():isInWorld(world:upper()) then 
                 counts = counts + 1
@@ -265,7 +260,7 @@ setting.reconnect = function(world,id,x,y)
         if id ~= "" then
             local stuckk = 0
             while getTile(getBot().x,getBot().y).fg == 6 do
-                sendPacket("action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0",3)
+                getBot():sendPacket(3,"action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0")
                 sleep(delaywarp)
                 if stuckk > 3 then
                     setting.botinfo("("..getBot().name..") Failed to reconnecting bot, stuck at white door. Terminated script @everyone")
@@ -286,7 +281,7 @@ setting.reconnect = function(world,id,x,y)
         local stuck = 0
         if id ~= "" then
             while getTile(getBot().x,getBot().y).fg == 6 do
-                sendPacket("action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0",3)
+                getBot():sendPacket(3,"action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0")
                 sleep(delaywarp)
                 if stuck > 3 then
                     setting.botinfo("("..getBot().name..") Failed to reconnecting bot, stuck at white door. Terminated script @everyone")
@@ -329,7 +324,7 @@ setting.warp = function(world,door,cooldown)
                     getBot():stopScript()
                 end
             end
-            sendPacket("action|join_request\nname|"..name.."\ninvitedWorld|0",3)
+            getBot():sendPacket(3,"action|join_request\nname|"..name.."\ninvitedWorld|0")
             listenEvents(8)
             sleep(cooldown)
         end
@@ -352,7 +347,7 @@ setting.warp = function(world,door,cooldown)
                         getBot():stopScript()
                     end
                 end
-                sendPacket("action|join_request\nname|"..name.."\ninvitedWorld|0",3)
+                getBot():sendPacket(3,"action|join_request\nname|"..name.."\ninvitedWorld|0")
                 sleep(cooldown)
                 stuck = stuck + 1
                 if stuck == 5 then
