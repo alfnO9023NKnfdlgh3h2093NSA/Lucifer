@@ -314,12 +314,9 @@ setting.warp = function(world,door,cooldown)
                 if variant:get(1):getString():lower():find("inaccessible.") then
                     nuked = true
                 end
-                if variant:get(1):getString():lower():find("experiencing ") then
-                    subserver = true
-                end
             end
         end)
-        while not getBot():isInWorld(world:upper()) and not nuked and not subserver do
+        while not getBot():isInWorld(world:upper()) and not nuked do
             if getBot():getPing() == 0 then
                 getBot():disconnect()
                 sleep(2000)
@@ -372,93 +369,18 @@ setting.storingitems = function()
         world = storagedrop[i]
         setting.warp(world,doorstoragedrop)
         setting.webhookinfo()
-        ::Here::
-        if not subserver then
-            if not nuked then
-                if not wrong then
-                    if setting.itemFloat(itemId[1]) >= limit then
-                        infoid[world] = ""..setting.itemFloat(itemId[1]).."x (LIMIT)"
-                        setting.botinfo("Drop storage : "..world.." has reached limit, skipped world @everyone")
-                        print("["..indexbot.."]Drop storage : "..world.."  has reached limit, skipped world")
-                        params.dropitems = params.dropitems + 1
-                        if params.dropitems > #storagedrop then
-                            infoid[world] = ""..setting.itemFloat(itemId[1]).."x (LIMIT)"
-                            setting.botinfo("All drop storage has reached limit, Removing bot : ("..getBot().name..") @everyone")
-                            print("["..indexbot.."]All drop storage has reached limit, Removing bot : ("..getBot().name..")")
-                            setting.webhookinfo()
-                            if removingbot then
-                                removeBot()
-                                sleep(2000)
-                            end
-                            getBot():stopScript()
-                        end
-                        tileDrop = 0
-                    else
-                        for y,pack in pairs(itemId) do
-                            for i,tile in pairs(getBot():getWorld():getTiles()) do
-                                if separated then
-                                    if tile.fg == 0 or tile.bg == 0 then
-                                        ::BACK::
-                                        findPath(dropX + (tileDrop),dropY - (y-1))
-                                        sleep(1000)
-                                        local count = 0
-                                        setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
-                                        if dropX + (tileDrop) >= 98 then
-                                            dropY = dropY - 1
-                                            tileDrop = 0
-                                        end
-                                        while findItem(pack) > 0 do
-                                            drop(pack)
-                                            sleep(delaydrop)
-                                            setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
-                                            count = count + 1
-                                            if count >= 2 then
-                                                tileDrop = tileDrop + 1
-                                                goto BACK
-                                            end
-                                        end
-                                    end
-                                else
-                                    if tile.fg == 0 or tile.bg == 0 then
-                                        ::BACK::
-                                        findPath(dropX + (tileDrop),dropY)
-                                        sleep(1000)
-                                        local count = 0
-                                        setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
-                                        if dropX + (tileDrop) >= 98 then
-                                            dropY = dropY - 1
-                                            tileDrop = 0
-                                        end
-                                        while findItem(pack) > 0 do
-                                            drop(pack)
-                                            sleep(delaydrop)
-                                            setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
-                                            count = count + 1
-                                            if count >= 2 then
-                                                tileDrop = tileDrop + 1
-                                                goto BACK
-                                            end
-                                        end
-                                    end
-                                end
-                                if findItem(pack) == 0 then
-                                    break
-                                end
-                            end
-                        end
-                        sleep(100)
-                        break
-                    end
-                else
-                    infoid[world] = "WRONG DOOR"
-                    wrong = false
-                    sleep(5000)
-                    print("["..indexbot.."]("..world..") Id door drop storage is wrong, check ur id door!")
-                    setting.botinfo("("..world..") Id door drop storage is wrong, check ur id door! @everyone")
+        if not nuked then
+            if not wrong then
+                if setting.itemFloat(itemId[1]) >= limit then
+                    infoid[world] = ""..setting.itemFloat(itemId[1]).."x (LIMIT)"
+                    setting.botinfo("Drop storage : "..world.." has reached limit, skipped world @everyone")
+                    print("["..indexbot.."]Drop storage : "..world.."  has reached limit, skipped world")
                     params.dropitems = params.dropitems + 1
                     if params.dropitems > #storagedrop then
-                        print("["..indexbot.."]All drop storage has reached limit")
-                        setting.botinfo("All drop storage has reached limit! Removing bot : ("..getBot().name..") @everyone")
+                        infoid[world] = ""..setting.itemFloat(itemId[1]).."x (LIMIT)"
+                        setting.botinfo("All drop storage has reached limit, Removing bot : ("..getBot().name..") @everyone")
+                        print("["..indexbot.."]All drop storage has reached limit, Removing bot : ("..getBot().name..")")
+                        setting.webhookinfo()
                         if removingbot then
                             removeBot()
                             sleep(2000)
@@ -466,16 +388,71 @@ setting.storingitems = function()
                         getBot():stopScript()
                     end
                     tileDrop = 0
+                else
+                    for y,pack in pairs(itemId) do
+                        for i,tile in pairs(getBot():getWorld():getTiles()) do
+                            if separated then
+                                if tile.fg == 0 or tile.bg == 0 then
+                                    ::BACK::
+                                    findPath(dropX + (tileDrop),dropY - (y-1))
+                                    sleep(1000)
+                                    local count = 0
+                                    setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
+                                    if dropX + (tileDrop) >= 98 then
+                                        dropY = dropY - 1
+                                        tileDrop = 0
+                                    end
+                                    while findItem(pack) > 0 do
+                                        drop(pack)
+                                        sleep(delaydrop)
+                                        setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
+                                        count = count + 1
+                                        if count >= 2 then
+                                            tileDrop = tileDrop + 1
+                                            goto BACK
+                                        end
+                                    end
+                                end
+                            else
+                                if tile.fg == 0 or tile.bg == 0 then
+                                    ::BACK::
+                                    findPath(dropX + (tileDrop),dropY)
+                                    sleep(1000)
+                                    local count = 0
+                                    setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
+                                    if dropX + (tileDrop) >= 98 then
+                                        dropY = dropY - 1
+                                        tileDrop = 0
+                                    end
+                                    while findItem(pack) > 0 do
+                                        drop(pack)
+                                        sleep(delaydrop)
+                                        setting.reconnect(world,doorstoragedrop,dropX + (tileDrop),dropY - (y-1))
+                                        count = count + 1
+                                        if count >= 2 then
+                                            tileDrop = tileDrop + 1
+                                            goto BACK
+                                        end
+                                    end
+                                end
+                            end
+                            if findItem(pack) == 0 then
+                                break
+                            end
+                        end
+                    end
+                    sleep(100)
+                    break
                 end
             else
-                infoid[world] = "NUKED"
-                nuked = false
+                infoid[world] = "WRONG DOOR"
+                wrong = false
                 sleep(5000)
-                print("["..indexbot.."]("..world..") drop Storage is NUKED, check ur storage!")
-                setting.botinfo("("..world..") drop Storage is NUKED, check ur storage! @everyone")
+                print("["..indexbot.."]("..world..") Id door drop storage is wrong, check ur id door!")
+                setting.botinfo("("..world..") Id door drop storage is wrong, check ur id door! @everyone")
                 params.dropitems = params.dropitems + 1
                 if params.dropitems > #storagedrop then
-                    print("["..indexbot.."]All drop storage has reached limit!")
+                    print("["..indexbot.."]All drop storage has reached limit")
                     setting.botinfo("All drop storage has reached limit! Removing bot : ("..getBot().name..") @everyone")
                     if removingbot then
                         removeBot()
@@ -486,13 +463,22 @@ setting.storingitems = function()
                 tileDrop = 0
             end
         else
-            subserver = false
+            infoid[world] = "NUKED"
+            nuked = false
             sleep(5000)
-            print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
-            setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
-            sleep(120000)
-            setting.reconnect(world,doorstoragedrop)
-            goto Here
+            print("["..indexbot.."]("..world..") drop Storage is NUKED, check ur storage!")
+            setting.botinfo("("..world..") drop Storage is NUKED, check ur storage! @everyone")
+            params.dropitems = params.dropitems + 1
+            if params.dropitems > #storagedrop then
+                print("["..indexbot.."]All drop storage has reached limit!")
+                setting.botinfo("All drop storage has reached limit! Removing bot : ("..getBot().name..") @everyone")
+                if removingbot then
+                    removeBot()
+                    sleep(2000)
+                end
+                getBot():stopScript()
+            end
+            tileDrop = 0
         end
     end
     infoid[world] = ""..setting.itemFloat(itemId[1]).."x"
@@ -504,29 +490,45 @@ setting.takestorage = function()
         world = storagetake[i]
         setting.warp(world,doorstoragetake)
         setting.webhookinfo()
-        ::Here::
-        if not subserver then
-            if not nuked then
-                if not wrong then
-                    if setting.itemFloat(itemId[1]) == 0 and not looping then
+        if not nuked then
+            if not wrong then
+                if setting.itemFloat(itemId[1]) == 0 and not looping then
+                    infoid[world] = ""..setting.itemFloat(itemId[1]).."x (EMPTY)"
+                    setting.botinfo("Take storage : ("..world..") has empty, skipped world @everyone")
+                    print("["..indexbot.."]Take storage : ("..world..") has empty, skipped world")
+                    params.takeitems = params.takeitems + 1
+                    if params.takeitems > #storagetake then
                         infoid[world] = ""..setting.itemFloat(itemId[1]).."x (EMPTY)"
-                        setting.botinfo("Take storage : ("..world..") has empty, skipped world @everyone")
-                        print("["..indexbot.."]Take storage : ("..world..") has empty, skipped world")
-                        params.takeitems = params.takeitems + 1
-                        if params.takeitems > #storagetake then
-                            infoid[world] = ""..setting.itemFloat(itemId[1]).."x (EMPTY)"
-                            setting.botinfo("All take storage has empty, Removing bot : ("..getBot().name..") @everyone")
-                            print("["..indexbot.."]All take storage has empty, Removing bot : ("..getBot().name..")")
-                            setting.webhookinfo()
-                            if removingbot then
-                                removeBot()
-                                sleep(2000)
-                            end
-                            getBot():stopScript()
+                        setting.botinfo("All take storage has empty, Removing bot : ("..getBot().name..") @everyone")
+                        print("["..indexbot.."]All take storage has empty, Removing bot : ("..getBot().name..")")
+                        setting.webhookinfo()
+                        if removingbot then
+                            removeBot()
+                            sleep(2000)
                         end
+                        getBot():stopScript()
+                    end
+                else
+                    if not looping then
+                        for _, pack in pairs(itemId) do
+                            for _, object in pairs(getBot():getWorld():getObjects()) do
+                                if object.id == pack then
+                                    findPath(math.floor((object.x)/32), math.floor((object.y)/32))
+                                    sleep(1000)
+                                    collect(3)
+                                    sleep(1000)
+                                    setting.reconnect(world,doorstoragetake,math.floor((object.x)/32), math.floor((object.y)/32))
+                                end
+                                if findItem(pack) > 0 then
+                                    break
+                                end
+                            end
+                        end
+                        sleep(100)
+                        break
                     else
-                        if not looping then
-                            for _, pack in pairs(itemId) do
+                        for _, pack in pairs(itemId) do
+                            while findItem(pack) == 0 do
                                 for _, object in pairs(getBot():getWorld():getObjects()) do
                                     if object.id == pack then
                                         findPath(math.floor((object.x)/32), math.floor((object.y)/32))
@@ -537,58 +539,23 @@ setting.takestorage = function()
                                     end
                                     if findItem(pack) > 0 then
                                         break
-                                    end
-                                end
-                            end
-                            sleep(100)
-                            break
-                        else
-                            for _, pack in pairs(itemId) do
-                                while findItem(pack) == 0 do
-                                    for _, object in pairs(getBot():getWorld():getObjects()) do
-                                        if object.id == pack then
-                                            findPath(math.floor((object.x)/32), math.floor((object.y)/32))
-                                            sleep(1000)
-                                            collect(3)
-                                            sleep(1000)
-                                            setting.reconnect(world,doorstoragetake,math.floor((object.x)/32), math.floor((object.y)/32))
-                                        end
-                                        if findItem(pack) > 0 then
-                                            break
-                                        else
-                                            sleep(delaylooping)
-                                        end
+                                    else
+                                        sleep(delaylooping)
                                     end
                                 end
                             end
                         end
-                    end
-                else
-                    infoid[world] = "WRONG DOOR"
-                    wrong = false
-                    sleep(5000)
-                    print("["..indexbot.."]("..world..") Id door take storage is wrong, check ur id door!")
-                    setting.botinfo("("..world..") Id door take storage is wrong, check ur id door! @everyone")
-                    params.takeitems = params.takeitems + 1
-                    if params.takeitems > #storagetake then
-                        print("["..indexbot.."]All take storage has empty")
-                        setting.botinfo("All take storage has empty! Removing bot : ("..getBot().name..") @everyone")
-                        if removingbot then
-                            removeBot()
-                            sleep(2000)
-                        end
-                        getBot():stopScript()
                     end
                 end
             else
-                infoid[world] = "NUKED"
-                nuked = false
+                infoid[world] = "WRONG DOOR"
+                wrong = false
                 sleep(5000)
-                print("["..indexbot.."]("..world..") take Storage is NUKED, check ur storage!")
-                setting.botinfo("("..world..") take Storage is NUKED, check ur storage! @everyone")
+                print("["..indexbot.."]("..world..") Id door take storage is wrong, check ur id door!")
+                setting.botinfo("("..world..") Id door take storage is wrong, check ur id door! @everyone")
                 params.takeitems = params.takeitems + 1
                 if params.takeitems > #storagetake then
-                    print("["..indexbot.."]All take storage has empty!")
+                    print("["..indexbot.."]All take storage has empty")
                     setting.botinfo("All take storage has empty! Removing bot : ("..getBot().name..") @everyone")
                     if removingbot then
                         removeBot()
@@ -598,13 +565,21 @@ setting.takestorage = function()
                 end
             end
         else
-            subserver = false
+            infoid[world] = "NUKED"
+            nuked = false
             sleep(5000)
-            print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
-            setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
-            sleep(120000)
-            setting.reconnect(world,doorstoragetake)
-            goto Here
+            print("["..indexbot.."]("..world..") take Storage is NUKED, check ur storage!")
+            setting.botinfo("("..world..") take Storage is NUKED, check ur storage! @everyone")
+            params.takeitems = params.takeitems + 1
+            if params.takeitems > #storagetake then
+                print("["..indexbot.."]All take storage has empty!")
+                setting.botinfo("All take storage has empty! Removing bot : ("..getBot().name..") @everyone")
+                if removingbot then
+                    removeBot()
+                    sleep(2000)
+                end
+                getBot():stopScript()
+            end
         end
     end
     infoid[world] = ""..setting.itemFloat(itemId[1]).."x"
