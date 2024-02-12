@@ -233,16 +233,16 @@ customizable.warp = function(world,door,cooldown)
                 sleep(2000)
             end
             if getBot().status ~= BotStatus.online then
-                setting.botinfo("("..getBot().name..") status is offline @everyone")
+                customizable.botinfo("("..getBot().name..") status is offline @everyone")
                 while getBot().status ~= BotStatus.online do
                     getBot():connect()
                     sleep(delayreconnect)
                     if getBot().status == BotStatus.account_banned then
-                        setting.botinfo("("..getBot().name..") status is suspended, removing bot @everyone")
+                        customizable.botinfo("("..getBot().name..") status is suspended, removing bot @everyone")
                         getBot():stopScript()
                     end
                 end
-                setting.botinfo("("..getBot().name..") status is online @everyone")
+                customizable.botinfo("("..getBot().name..") status is online @everyone")
             end
             getBot():sendPacket(3,"action|join_request\nname|"..name.."\ninvitedWorld|0")
             listenEvents(8)
@@ -260,16 +260,16 @@ customizable.warp = function(world,door,cooldown)
                     sleep(4000)
                 end
                 if getBot().status ~= BotStatus.online then
-                    setting.botinfo("("..getBot().name..") status is offline @everyone")
+                    customizable.botinfo("("..getBot().name..") status is offline @everyone")
                     while getBot().status ~= BotStatus.online do
                         getBot():connect()
                         sleep(delayreconnect)
                         if getBot().status == BotStatus.account_banned then
-                            setting.botinfo("("..getBot().name..") status is suspended, removing bot @everyone")
+                            customizable.botinfo("("..getBot().name..") status is suspended, removing bot @everyone")
                             getBot():stopScript()
                         end
                     end
-                    setting.botinfo("("..getBot().name..") status is online @everyone")
+                    customizable.botinfo("("..getBot().name..") status is online @everyone")
                 end
                 getBot():sendPacket(3,"action|join_request\nname|"..name.."\ninvitedWorld|0")
                 sleep(cooldown)
@@ -314,7 +314,7 @@ customizable.storingitems = function()
                                 if tile.fg == 0 or tile.bg == 0 then
                                     ::BACK::
                                     getBot():findPath(customizable.initX + (customizable.tileX),customizable.initY - (y-1))
-                                    sleep(1000)
+                                    sleep(100)
                                     local count = 0
                                     customizable.reconnect(world,doorstoragedrop,customizable.initX + (customizable.tileX),customizable.initY - (y-1))
                                     if customizable.initX + (customizable.tileX) >= 98 then
@@ -336,7 +336,7 @@ customizable.storingitems = function()
                                 if tile.fg == 0 or tile.bg == 0 then
                                     ::BACK::
                                     getBot():findPath(customizable.initX + (customizable.tileX),customizable.initY)
-                                    sleep(1000)
+                                    sleep(100)
                                     local count = 0
                                     customizable.reconnect(world,doorstoragedrop,customizable.initX + (customizable.tileX),customizable.initY - (y-1))
                                     if customizable.initX + (customizable.tileX) >= 98 then
@@ -431,7 +431,7 @@ customizable.takestorage = function()
                             for _, object in pairs(getBot():getWorld():getObjects()) do
                                 if object.id == pack then
                                     getBot():findPath(math.floor((object.x)/32), math.floor((object.y)/32))
-                                    sleep(1000)
+                                    sleep(100)
                                     getBot():collect(3)
                                     sleep(1000)
                                     customizable.reconnect(world,doorstoragetake,math.floor((object.x)/32), math.floor((object.y)/32))
@@ -449,7 +449,7 @@ customizable.takestorage = function()
                                 for _, object in pairs(getBot():getWorld():getObjects()) do
                                     if object.id == pack then
                                         getBot():findPath(math.floor((object.x)/32), math.floor((object.y)/32))
-                                        sleep(1000)
+                                        sleep(100)
                                         getBot():collect(3)
                                         sleep(1000)
                                         customizable.reconnect(world,doorstoragetake,math.floor((object.x)/32), math.floor((object.y)/32))
