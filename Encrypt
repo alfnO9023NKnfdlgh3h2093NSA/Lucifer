@@ -14,7 +14,7 @@ local customizable = {
     initY = posY - 1
 }
 
-customizable.randomletter = function()
+customizable.guestId = function()
     local letter = ""
     local function stringRandom()
         local random = math.random(1,3)
@@ -43,7 +43,7 @@ customizable.split = function(str, ptr)
     return tbl
 end
 
-customizable.getEnetBot = function()
+customizable.initBot = function()
     str = ""
     for i, val in pairs(getBots()) do
         if val.status == BotStatus.online then
@@ -60,7 +60,7 @@ customizable.getEnetBot = function()
     return str
 end
 
-customizable.botstatus = function()
+customizable.initStatus = function()
     str = ""
     for _, bot in pairs(getBots()) do
         str = str.."\n["..bot.level.."]||"..string.upper(bot.name).."||" 
@@ -68,7 +68,7 @@ customizable.botstatus = function()
     return str
 end
 
-customizable.botworld = function()
+customizable.initWorld = function()
     str = ""
     for _, bots in pairs(getBots()) do
         str = str.."\n||"..string.upper(bots:getWorld().name).."||" 
@@ -76,7 +76,7 @@ customizable.botworld = function()
     return str
 end
 
-customizable.takename = function()
+customizable.initOnStorage = function()
     str = ""
     for i = 1, #storagetake do
         str = str.."\n||"..string.upper(storagetake[i]).."|| : "..(initialize[storagetake[i]] or "?")..""
@@ -84,7 +84,7 @@ customizable.takename = function()
     return str
 end
 
-customizable.dropname = function()
+customizable.initOutStorage = function()
     str = ""
     for i = 1, #storagedrop do
         str = str.."\n||"..string.upper(storagedrop[i]).."|| : "..(initialize[storagedrop[i]] or "?")..""
@@ -96,7 +96,7 @@ customizable.itemFloat = function(id)
     return getBot():getWorld().growscan:getObjects()[id] or 0
 end
 
-customizable.webhookinfo = function()
+customizable.initializeBots = function()
 	if botinfo then
         local text = [[
             $webHookUrl = "]]..linkbotinfo..[[/messages/]]..messageidbotinfo..[["
@@ -109,27 +109,27 @@ customizable.webhookinfo = function()
                         fields = @(
                             @{
                                 name = "BOTNAME"
-                                value = "]]..customizable.botstatus()..[["
+                                value = "]]..customizable.initStatus()..[["
                                 inline = "true"
                             }
                             @{
                                 name = "WORLD"
-                                value = "]]..customizable.botworld()..[["
+                                value = "]]..customizable.initWorld()..[["
                                 inline = "true"
                             }
                             @{
                                 name = "STATUS"
-                                value = "]]..customizable.getEnetBot()..[["
+                                value = "]]..customizable.initBot()..[["
                                 inline = "true"
                             }
                             @{
                                 name = "STORAGE TAKE"
-                                value = "]]..customizable.takename()..[["
+                                value = "]]..customizable.initOnStorage()..[["
                                 inline = "true"
                             }
                             @{
                                 name = "STORAGE DROP"
-                                value = "]]..customizable.dropname()..[["
+                                value = "]]..customizable.initOutStorage()..[["
                                 inline = "true"
                             }
                         )
@@ -149,7 +149,7 @@ customizable.webhookinfo = function()
     end
 end
 
-customizable.botinfo = function(text)
+customizable.botStatics = function(text)
     if webhookstatus then
         text = [[
             $webHookUrl = "]]..webhookstatuslink..[["
@@ -172,12 +172,12 @@ customizable.reconnect = function(world,id,x,y)
         sleep(4000)
     end
     if getBot().status ~= BotStatus.online then
-        customizable.botinfo("("..getBot().name..") status is offline @everyone")
+        customizable.botStatics("("..getBot().name..") status is offline @everyone")
         while getBot().status ~= BotStatus.online do
             getBot():connect()
             sleep(delayreconnect)
             if getBot().status == BotStatus.account_banned then
-                customizable.botinfo("("..getBot().name..") status is suspended, removing bot @everyone")
+                customizable.botStatics("("..getBot().name..") status is suspended, removing bot @everyone")
                 getBot():stopScript()
             end
         end
@@ -188,7 +188,7 @@ customizable.reconnect = function(world,id,x,y)
             if not getBot():isInWorld(world:upper()) then 
                 count = count + 1
                 if count > 5 then
-                    customizable.botinfo("("..getBot().name..") Failed to joining world again, terminated script @everyone")
+                    customizable.botStatics("("..getBot().name..") Failed to joining world again, terminated script @everyone")
                     getBot():stopScript()
                 end
             end
@@ -199,7 +199,7 @@ customizable.reconnect = function(world,id,x,y)
                 getBot():sendPacket(3,"action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0")
                 sleep(delaywarp)
                 if stuck > 3 then
-                    customizable.botinfo("("..getBot().name..") Failed to reconnecting bot, stuck at white door. Terminated script @everyone")
+                    customizable.botStatics("("..getBot().name..") Failed to reconnecting bot, stuck at white door. Terminated script @everyone")
                     getBot():stopScript()
                 end
             end
@@ -210,7 +210,7 @@ customizable.reconnect = function(world,id,x,y)
                 sleep(150)
             end
         end
-        customizable.botinfo("("..getBot().name..") status is online @everyone")
+        customizable.botStatics("("..getBot().name..") status is online @everyone")
     end
 end
 
@@ -233,16 +233,16 @@ customizable.warp = function(world,door,cooldown)
                 sleep(2000)
             end
             if getBot().status ~= BotStatus.online then
-                customizable.botinfo("("..getBot().name..") status is offline @everyone")
+                customizable.botStatics("("..getBot().name..") status is offline @everyone")
                 while getBot().status ~= BotStatus.online do
                     getBot():connect()
                     sleep(delayreconnect)
                     if getBot().status == BotStatus.account_banned then
-                        customizable.botinfo("("..getBot().name..") status is suspended, removing bot @everyone")
+                        customizable.botStatics("("..getBot().name..") status is suspended, removing bot @everyone")
                         getBot():stopScript()
                     end
                 end
-                customizable.botinfo("("..getBot().name..") status is online @everyone")
+                customizable.botStatics("("..getBot().name..") status is online @everyone")
             end
             getBot():sendPacket(3,"action|join_request\nname|"..name.."\ninvitedWorld|0")
             listenEvents(8)
@@ -260,16 +260,16 @@ customizable.warp = function(world,door,cooldown)
                     sleep(4000)
                 end
                 if getBot().status ~= BotStatus.online then
-                    customizable.botinfo("("..getBot().name..") status is offline @everyone")
+                    customizable.botStatics("("..getBot().name..") status is offline @everyone")
                     while getBot().status ~= BotStatus.online do
                         getBot():connect()
                         sleep(delayreconnect)
                         if getBot().status == BotStatus.account_banned then
-                            customizable.botinfo("("..getBot().name..") status is suspended, removing bot @everyone")
+                            customizable.botStatics("("..getBot().name..") status is suspended, removing bot @everyone")
                             getBot():stopScript()
                         end
                     end
-                    customizable.botinfo("("..getBot().name..") status is online @everyone")
+                    customizable.botStatics("("..getBot().name..") status is online @everyone")
                 end
                 getBot():sendPacket(3,"action|join_request\nname|"..name.."\ninvitedWorld|0")
                 sleep(cooldown)
@@ -282,24 +282,24 @@ customizable.warp = function(world,door,cooldown)
     end
 end
 
-customizable.storingitems = function()
+customizable.onStoring = function()
     for i = customizable.indexDrop , #storagedrop do
         print("["..pcallBot.."]Dropping items")
         world = storagedrop[i]
         customizable.warp(world,doorstoragedrop)
-        customizable.webhookinfo()
+        customizable.initializeBots()
         if not nuked then
             if not wrong then
                 if customizable.itemFloat(itemId[1]) >= limit then
                     initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (LIMIT)"
-                    customizable.botinfo("Drop storage : "..world.." has reached limit, skipped world @everyone")
+                    customizable.botStatics("Drop storage : "..world.." has reached limit, skipped world @everyone")
                     print("["..pcallBot.."]Drop storage : "..world.."  has reached limit, skipped world")
                     customizable.indexDrop = customizable.indexDrop + 1
                     if customizable.indexDrop > #storagedrop then
                         initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (LIMIT)"
-                        customizable.botinfo("All drop storage has reached limit, Removing bot : ("..getBot().name..") @everyone")
+                        customizable.botStatics("All drop storage has reached limit, Removing bot : ("..getBot().name..") @everyone")
                         print("["..pcallBot.."]All drop storage has reached limit, Removing bot : ("..getBot().name..")")
-                        customizable.webhookinfo()
+                        customizable.initializeBots()
                         if removingbot then
                             removeBot()
                             sleep(2000)
@@ -367,11 +367,11 @@ customizable.storingitems = function()
                 initialize[world] = "WRONG DOOR"
                 wrong = false
                 print("["..pcallBot.."]("..world..") Id door drop storage is wrong, check ur id door!")
-                customizable.botinfo("("..world..") Id door drop storage is wrong, check ur id door! @everyone")
+                customizable.botStatics("("..world..") Id door drop storage is wrong, check ur id door! @everyone")
                 customizable.indexDrop = customizable.indexDrop + 1
                 if customizable.indexDrop > #storagedrop then
                     print("["..pcallBot.."]All drop storage has reached limit")
-                    customizable.botinfo("All drop storage has reached limit! Removing bot : ("..getBot().name..") @everyone")
+                    customizable.botStatics("All drop storage has reached limit! Removing bot : ("..getBot().name..") @everyone")
                     if removingbot then
                         removeBot()
                         sleep(2000)
@@ -384,11 +384,11 @@ customizable.storingitems = function()
             initialize[world] = "NUKED"
             nuked = false
             print("["..pcallBot.."]("..world..") drop Storage is NUKED, check ur storage!")
-            customizable.botinfo("("..world..") drop Storage is NUKED, check ur storage! @everyone")
+            customizable.botStatics("("..world..") drop Storage is NUKED, check ur storage! @everyone")
             customizable.indexDrop = customizable.indexDrop + 1
             if customizable.indexDrop > #storagedrop then
                 print("["..pcallBot.."]All drop storage has reached limit!")
-                customizable.botinfo("All drop storage has reached limit! Removing bot : ("..getBot().name..") @everyone")
+                customizable.botStatics("All drop storage has reached limit! Removing bot : ("..getBot().name..") @everyone")
                 if removingbot then
                     removeBot()
                     sleep(2000)
@@ -401,24 +401,24 @@ customizable.storingitems = function()
     initialize[world] = ""..customizable.itemFloat(itemId[1]).."x"
 end
 
-customizable.takestorage = function()
+customizable.onTake = function()
     for i = customizable.indexTake, #storagetake do
         print("["..pcallBot.."]Taking items")
         world = storagetake[i]
         customizable.warp(world,doorstoragetake)
-        customizable.webhookinfo()
+        customizable.initializeBots()
         if not nuked then
             if not wrong then
                 if customizable.itemFloat(itemId[1]) == 0 and not looping then
                     initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (EMPTY)"
-                    customizable.botinfo("Take storage : ("..world..") has empty, skipped world @everyone")
+                    customizable.botStatics("Take storage : ("..world..") has empty, skipped world @everyone")
                     print("["..pcallBot.."]Take storage : ("..world..") has empty, skipped world")
                     customizable.indexTake = customizable.indexTake + 1
                     if customizable.indexTake > #storagetake then
                         initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (EMPTY)"
-                        customizable.botinfo("All take storage has empty, Removing bot : ("..getBot().name..") @everyone")
+                        customizable.botStatics("All take storage has empty, Removing bot : ("..getBot().name..") @everyone")
                         print("["..pcallBot.."]All take storage has empty, Removing bot : ("..getBot().name..")")
-                        customizable.webhookinfo()
+                        customizable.initializeBots()
                         if removingbot then
                             removeBot()
                             sleep(2000)
@@ -470,11 +470,11 @@ customizable.takestorage = function()
                 initialize[world] = "WRONG DOOR"
                 wrong = false
                 print("["..pcallBot.."]("..world..") Id door take storage is wrong, check ur id door!")
-                customizable.botinfo("("..world..") Id door take storage is wrong, check ur id door! @everyone")
+                customizable.botStatics("("..world..") Id door take storage is wrong, check ur id door! @everyone")
                 customizable.indexTake = customizable.indexTake + 1
                 if customizable.indexTake > #storagetake then
                     print("["..pcallBot.."]All take storage has empty")
-                    customizable.botinfo("All take storage has empty! Removing bot : ("..getBot().name..") @everyone")
+                    customizable.botStatics("All take storage has empty! Removing bot : ("..getBot().name..") @everyone")
                     if removingbot then
                         removeBot()
                         sleep(2000)
@@ -486,11 +486,11 @@ customizable.takestorage = function()
             initialize[world] = "NUKED"
             nuked = false
             print("["..pcallBot.."]("..world..") take Storage is NUKED, check ur storage!")
-            customizable.botinfo("("..world..") take Storage is NUKED, check ur storage! @everyone")
+            customizable.botStatics("("..world..") take Storage is NUKED, check ur storage! @everyone")
             customizable.indexTake = customizable.indexTake + 1
             if customizable.indexTake > #storagetake then
                 print("["..pcallBot.."]All take storage has empty!")
-                customizable.botinfo("All take storage has empty! Removing bot : ("..getBot().name..") @everyone")
+                customizable.botStatics("All take storage has empty! Removing bot : ("..getBot().name..") @everyone")
                 if removingbot then
                     removeBot()
                     sleep(2000)
@@ -502,7 +502,7 @@ customizable.takestorage = function()
     initialize[world] = ""..customizable.itemFloat(itemId[1]).."x"
 end
 
-customizable.main = function()
+customizable.addingBots = function()
     if typeaccount == "guest" then
         for i,bot in pairs(botList) do
             local derr = {}
@@ -511,7 +511,7 @@ customizable.main = function()
             end
             x = derr[1]
             y = derr[2]
-            addBot(""..customizable.randomletter().."",x,y)
+            addBot(""..customizable.guestId().."",x,y)
             sleep(delayloginbot)
         end
     elseif typeaccount == "normal" then
@@ -529,7 +529,7 @@ customizable.main = function()
     print("Please select all and re-execute script")
 end
 
-customizable.setauth = function()
+customizable.setAuth = function()
     if not pcallBot and proxyServerDatabase then
         getProxyManager().custom_http_proxy = true
         getProxyManager().http_cooldown = delayDataBase
@@ -554,8 +554,8 @@ end
 
 if Information == "Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq" and scriptVersion == "0.1" then
     if autologin and not pcallBot then
-        customizable.setauth()
-        customizable.main()
+        customizable.setAuth()
+        customizable.addingBots()
     end
     getBot().auto_reconnect = false
     while getBot().status ~= BotStatus.online do
@@ -564,10 +564,10 @@ if Information == "Script Move WTW made by Caramoy Syndicate, Link Server : http
     end
     sleep(pcallBot * delayexecute)
     while true do
-        customizable.takestorage()
-        customizable.storingitems()
+        customizable.onTake()
+        customizable.onStoring()
     end
 else
     print("["..pcallBot.."]Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq")
-    customizable.botinfo("Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq")
+    customizable.botStatics("Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq")
 end
