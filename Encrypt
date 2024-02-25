@@ -455,16 +455,25 @@ customizable.onTake = function()
                         if not looping then
                             if customizable.itemFloat(itemId[1]) > 0 then
                                 for _, pack in pairs(itemId) do
-                                    for _, object in pairs(getBot():getWorld():getObjects()) do
-                                        if object.id == pack then
-                                            getBot():findPath(math.floor((object.x)/32), math.floor((object.y)/32))
-                                            sleep(100)
-                                            getBot():collect(3)
-                                            sleep(500)
-                                            customizable.reconnect(world,door,math.floor((object.x)/32), math.floor((object.y)/32))
+                                    local count = 0
+                                    while getBot():getInventory():getItemCount(pack) <= amountTake do
+                                        for _, object in pairs(getBot():getWorld():getObjects()) do
+                                            if object.id == pack then
+                                                getBot():findPath(math.floor((object.x)/32), math.floor((object.y)/32))
+                                                sleep(100)
+                                                getBot():collect(3)
+                                                sleep(500)
+                                                customizable.reconnect(world,door,math.floor((object.x)/32), math.floor((object.y)/32))
+                                                break
+                                            end
                                         end
-                                        if getBot():getInventory():getItemCount(pack) > 0 then
+                                        if getBot():getInventory():getItemCount(pack) >= amountTake then
                                             break
+                                        else
+                                            count = count + 1
+                                            if count == 3 then
+                                                break
+                                            end
                                         end
                                     end
                                 end
@@ -498,7 +507,7 @@ customizable.onTake = function()
                                         sleep(500)
                                         customizable.reconnect(world,door,math.floor((object.x)/32), math.floor((object.y)/32))
                                     end
-                                    if getBot():getInventory():getItemCount(pack) > 0 then
+                                    if getBot():getInventory():getItemCount(pack) >= amountTake then
                                         break
                                     end
                                 end
@@ -556,7 +565,7 @@ end
 
 customizable.realizm = function()
     for idx, val in pairs(itemId) do
-        if getBot():getInventory():getItemCount(val) > 0 then
+        if getBot():getInventory():getItemCount(val) > amountTake then
             return true
         end
     end
