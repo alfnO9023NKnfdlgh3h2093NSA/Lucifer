@@ -456,7 +456,7 @@ customizable.onTake = function()
                             if customizable.itemFloat(itemId[1]) > 0 then
                                 for _, pack in pairs(itemId) do
                                     local count = 0
-                                    while getBot():getInventory():getItemCount(pack) <= amountTake do
+                                    while getBot():getInventory():getItemCount(pack) < amountTake do
                                         for _, object in pairs(getBot():getWorld():getObjects()) do
                                             if object.id == pack then
                                                 getBot():findPath(math.floor((object.x)/32), math.floor((object.y)/32))
