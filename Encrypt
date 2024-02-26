@@ -328,12 +328,14 @@ customizable.onStoring = function()
                                             getBot():findPath(customizable.initX + (customizable.tileX),customizable.initY)
                                             sleep(100)
                                             local count = 0
-                                            customizable.reconnect(world,door,customizable.initX + (customizable.tileX),customizable.initY )
+                                            customizable.reconnect(world,door,customizable.initX + (customizable.tileX),customizable.initY)
                                             if customizable.initX + (customizable.tileX) >= 98 then
                                                 customizable.initY = customizable.initY - 1
                                                 customizable.tileX = 0
                                             end
                                             while getBot():getInventory():getItemCount(pack) > 0 do
+                                                getBot():setDirection(true)
+                                                sleep(100)
                                                 getBot():drop(pack,200)
                                                 sleep(delaydrop * 1000)
                                                 customizable.reconnect(world,door,customizable.initX + (customizable.tileX),customizable.initY)
@@ -348,15 +350,17 @@ customizable.onStoring = function()
                                             getBot():findPath(customizable.initX + (customizable.tileX),customizable.initY)
                                             sleep(100)
                                             local count = 0
-                                            customizable.reconnect(world,door,customizable.initX + (customizable.tileX),customizable.initY - (y-1))
+                                            customizable.reconnect(world,door,customizable.initX + (customizable.tileX),customizable.initY)
                                             if customizable.initX + (customizable.tileX) >= 98 then
                                                 customizable.initY = customizable.initY - 1
                                                 customizable.tileX = 0
                                             end
                                             while getBot():getInventory():getItemCount(pack) > 0 do
+                                                getBot():setDirection(true)
+                                                sleep(100)
                                                 getBot():drop(pack,200)
                                                 sleep(delaydrop * 1000)
-                                                customizable.reconnect(world,door,customizable.initX + (customizable.tileX),customizable.initY - (y-1))
+                                                customizable.reconnect(world,door,customizable.initX + (customizable.tileX),customizable.initY)
                                                 count = count + 1
                                                 if count >= 2 then
                                                     customizable.tileX = customizable.tileX + 1
