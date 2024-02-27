@@ -319,7 +319,25 @@ customizable.onStoring = function()
             if not subserver then
                 if not nuked then
                     if not wrong then
-                        if customizable.itemFloat(itemId[1]) < limit then
+                        if customizable.itemFloat(itemId[1]) >= limit then
+                            initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (LIMIT)"
+                            customizable.botStatics("Drop storage : ||"..world.."|| has reached limit, skipped world","Status Script : Running")
+                            print("["..pcallBot.."]Drop storage : "..world.."  has reached limit, skipped world")
+                            customizable.indexDrop = customizable.indexDrop + 1
+                            if customizable.indexDrop > #storagedrop then
+                                initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (LIMIT)"
+                                customizable.botStatics("All drop storage has reached limit","Status Script : Stopped, Reason : All drop storage is limit")
+                                print("["..pcallBot.."]All drop storage has reached limit")
+                                customizable.initializeBots()
+                                if removingbot then
+                                    removeBot()
+                                    sleep(2000)
+                                end
+                                customizable.warp(customizable.randomLetter(),"")
+                                getBot():stopScript()
+                            end
+                            customizable.tileX = 0
+                        else
                             for y,pack in pairs(itemId) do
                                 for i,tile in pairs(getBot():getWorld():getTiles()) do
                                     if separated then
@@ -412,24 +430,6 @@ customizable.onStoring = function()
                             end
                             sleep(100)
                             break
-                        else
-                            initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (LIMIT)"
-                            customizable.botStatics("Drop storage : ||"..world.."|| has reached limit, skipped world","Status Script : Running")
-                            print("["..pcallBot.."]Drop storage : "..world.."  has reached limit, skipped world")
-                            customizable.indexDrop = customizable.indexDrop + 1
-                            if customizable.indexDrop > #storagedrop then
-                                initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (LIMIT)"
-                                customizable.botStatics("All drop storage has reached limit","Status Script : Stopped, Reason : All drop storage is limit")
-                                print("["..pcallBot.."]All drop storage has reached limit")
-                                customizable.initializeBots()
-                                if removingbot then
-                                    removeBot()
-                                    sleep(2000)
-                                end
-                                customizable.warp(customizable.randomLetter(),"")
-                                getBot():stopScript()
-                            end
-                            customizable.tileX = 0
                         end
                     else
                         initialize[world] = "WRONG DOOR"
@@ -510,7 +510,24 @@ customizable.onTake = function()
                                     end
                                 end
                             end
-                            if customizable.itemFloat(itemId[1]) > 0 then
+                            if customizable.itemFloat(itemId[1]) < amountTake then
+                                initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (More less than amount take)"
+                                customizable.botStatics("Take storage : ||"..world.."|| has empty, skipped world","Status Script : Running")
+                                print("["..pcallBot.."]Take storage : ("..world..") has empty, skipped world")
+                                customizable.indexTake = customizable.indexTake + 1
+                                if customizable.indexTake > #storagetake then
+                                    initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (More less than amount take)"
+                                    customizable.botStatics("All take storage has empty","Status Script : Stopped, Reason : All storage take is empty")
+                                    print("["..pcallBot.."]All take storage has empty")
+                                    customizable.initializeBots()
+                                    if removingbot then
+                                        removeBot()
+                                        sleep(2000)
+                                    end
+                                    customizable.warp(customizable.randomLetter(),"")
+                                    getBot():stopScript()
+                                end
+                            else
                                 for _, pack in pairs(itemId) do
                                     local count = 0
                                     while getBot():getInventory():getItemCount(pack) < amountTake do
@@ -536,23 +553,6 @@ customizable.onTake = function()
                                 end
                                 sleep(100)
                                 break
-                            else
-                                initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (EMPTY)"
-                                customizable.botStatics("Take storage : ||"..world.."|| has empty, skipped world","Status Script : Running")
-                                print("["..pcallBot.."]Take storage : ("..world..") has empty, skipped world")
-                                customizable.indexTake = customizable.indexTake + 1
-                                if customizable.indexTake > #storagetake then
-                                    initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (EMPTY)"
-                                    customizable.botStatics("All take storage has empty","Status Script : Stopped, Reason : All storage take is empty")
-                                    print("["..pcallBot.."]All take storage has empty")
-                                    customizable.initializeBots()
-                                    if removingbot then
-                                        removeBot()
-                                        sleep(2000)
-                                    end
-                                    customizable.warp(customizable.randomLetter(),"")
-                                    getBot():stopScript()
-                                end
                             end
                         else
                             for _, pack in pairs(itemId) do
