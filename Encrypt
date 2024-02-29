@@ -15,6 +15,13 @@ local customizable = {
     initY = posY - 1
 }
 
+customizable.notifications = function(desc)
+    messageBox = MessageBox.new()
+    messageBox.title = "Caramoy Syndicate"
+    messageBox.description = desc
+    messageBox:send()
+end
+
 customizable.randomLetter = function()
     local withnum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     local generate = ""
@@ -339,12 +346,13 @@ customizable.onStoring = function()
                         if customizable.itemFloat(itemId[1]) >= limit then
                             initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (LIMIT)"
                             customizable.botStatics("Drop storage : ||"..world.."|| has reached limit, skipped world","Status Script : Running")
-                            print("["..pcallBot.."]Drop storage : "..world.."  has reached limit, skipped world")
+                            customizable.notifications("["..pcallBot.."]Drop storage : "..world.."  has reached limit, skipped world")
                             customizable.indexDrop = customizable.indexDrop + 1
+                            customizable.tileX = 0
                             if customizable.indexDrop > #storagedrop then
                                 initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (LIMIT)"
                                 customizable.botStatics("All drop storage has reached limit","Status Script : Stopped, Reason : All drop storage is limit")
-                                print("["..pcallBot.."]All drop storage has reached limit")
+                                customizable.notifications("["..pcallBot.."]All drop storage has reached limit")
                                 customizable.initializeBots()
                                 if removingbot then
                                     removeBot()
@@ -353,7 +361,6 @@ customizable.onStoring = function()
                                 customizable.warp(customizable.randomLetter(),"")
                                 getBot():stopScript()
                             end
-                            customizable.tileX = 0
                         else
                             for y,pack in pairs(itemId) do
                                 for i,tile in pairs(getBot():getWorld():getTiles()) do
@@ -440,11 +447,12 @@ customizable.onStoring = function()
                     else
                         initialize[world] = "WRONG DOOR"
                         wrong = false
-                        print("["..pcallBot.."]("..world..") Id door drop storage is wrong, check ur id door!")
+                        customizable.notifications("["..pcallBot.."]("..world..") Id door drop storage is wrong, check ur id door!")
                         customizable.botStatics("||"..world.."|| Id door drop storage is wrong, check ur id door!","Status Script : Running")
                         customizable.indexDrop = customizable.indexDrop + 1
+                        customizable.tileX = 0
                         if customizable.indexDrop > #storagedrop then
-                            print("["..pcallBot.."]All drop storage has reached limit")
+                            customizable.notifications("["..pcallBot.."]All drop storage has reached limit")
                             customizable.botStatics("All drop storage has reached limit!","Status Script : Stopped, Reason : All drop storage is limit")
                             if removingbot then
                                 removeBot()
@@ -453,16 +461,16 @@ customizable.onStoring = function()
                             customizable.warp(customizable.randomLetter(),"")
                             getBot():stopScript()
                         end
-                        customizable.tileX = 0
                     end
                 else
                     initialize[world] = "NUKED"
                     nuked = false
-                    print("["..pcallBot.."]("..world..") drop Storage is NUKED, check ur storage!")
+                    customizable.notifications("["..pcallBot.."]("..world..") drop Storage is NUKED, check ur storage!")
                     customizable.botStatics("||"..world.."|| drop Storage is NUKED, check ur storage!","Status Script : Running")
                     customizable.indexDrop = customizable.indexDrop + 1
+                    customizable.tileX = 0
                     if customizable.indexDrop > #storagedrop then
-                        print("["..pcallBot.."]All drop storage has reached limit!")
+                        customizable.notifications("["..pcallBot.."]All drop storage has reached limit!")
                         customizable.botStatics("All drop storage has reached limit!","Status Script : Stopped, All drop storage is limit")
                         if removingbot then
                             removeBot()
@@ -471,7 +479,6 @@ customizable.onStoring = function()
                         customizable.warp(customizable.randomLetter(),"")
                         getBot():stopScript()
                     end
-                    customizable.tileX = 0
                 end
             else
                 subserver = false
@@ -502,12 +509,12 @@ customizable.onTake = function()
                             if customizable.itemFloat(itemId[1]) < amountTake then
                                 initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (More less than amount take)"
                                 customizable.botStatics("Take storage : ||"..world.."|| has empty, skipped world","Status Script : Running")
-                                print("["..pcallBot.."]Take storage : ("..world..") has empty, skipped world")
+                                customizable.notifications("["..pcallBot.."]Take storage : ("..world..") has empty, skipped world")
                                 customizable.indexTake = customizable.indexTake + 1
                                 if customizable.indexTake > #storagetake then
                                     initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (More less than amount take)"
                                     customizable.botStatics("All take storage has empty","Status Script : Stopped, Reason : All storage take is empty")
-                                    print("["..pcallBot.."]All take storage has empty")
+                                    customizable.notifications("["..pcallBot.."]All take storage has empty")
                                     customizable.initializeBots()
                                     if removingbot then
                                         removeBot()
@@ -564,11 +571,11 @@ customizable.onTake = function()
                     else
                         initialize[world] = "WRONG DOOR"
                         wrong = false
-                        print("["..pcallBot.."]("..world..") Id door take storage is wrong, check ur id door!")
+                        customizable.notifications("["..pcallBot.."]("..world..") Id door take storage is wrong, check ur id door!")
                         customizable.botStatics("||"..world.."|| Id door take storage is wrong, check ur id door!","Status Script : Running")
                         customizable.indexTake = customizable.indexTake + 1
                         if customizable.indexTake > #storagetake then
-                            print("["..pcallBot.."]All take storage has empty")
+                            customizable.notifications("["..pcallBot.."]All take storage has empty")
                             customizable.botStatics("All take storage has empty!","Status Script : Stopped, Reason : All storage take is empty")
                             if removingbot then
                                 removeBot()
@@ -581,11 +588,11 @@ customizable.onTake = function()
                 else
                     initialize[world] = "NUKED"
                     nuked = false
-                    print("["..pcallBot.."]("..world..") take Storage is NUKED, check ur storage!")
+                    customizable.notifications("["..pcallBot.."]("..world..") take Storage is NUKED, check ur storage!")
                     customizable.botStatics("||"..world.."|| take Storage is NUKED, check ur storage!","Status Script : Running")
                     customizable.indexTake = customizable.indexTake + 1
                     if customizable.indexTake > #storagetake then
-                        print("["..pcallBot.."]All take storage has empty!")
+                        customizable.notifications("["..pcallBot.."]All take storage has empty!")
                         customizable.botStatics("All take storage has empty!","Status Script : Stopped, Reason : All take storage is empty")
                         if removingbot then
                             removeBot()
@@ -638,6 +645,6 @@ if Information == "Script Move WTW made by Caramoy Syndicate, Link Server : http
         end
     end
 else
-    print("["..pcallBot.."]Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq")
+    customizable.notifications("["..pcallBot.."]Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq")
     customizable.botStatics("Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq","Status Script : Stopped, Reason : Reseller idiot")
 end
