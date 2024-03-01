@@ -175,7 +175,7 @@ customizable.reconnect = function(world,id,x,y)
         sleep(2000)
     end
     if not getBot():isInWorld(world:upper()) or getBot().status ~= BotStatus.online then
-        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().." Current : "..getWorld().name.."","Status Script : Running")
+        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().." Current : "..getBot():getWorld().name.."","Status Script : Running")
         ::back::
         while getBot().status ~= BotStatus.online do
             getBot():connect()
@@ -212,7 +212,7 @@ customizable.reconnect = function(world,id,x,y)
                 sleep(150)
             end
         end
-        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().." Current : "..getWorld().name.."","Status Script : Running")
+        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().." Current : "..getBot():getWorld().name.."","Status Script : Running")
     end
 end
 
