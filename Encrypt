@@ -174,28 +174,9 @@ customizable.reconnect = function(world,id,x,y)
         getBot():disconnect()
         sleep(2000)
     end
-    if not getBot():isInWorld(world:upper()) and getBot().status == BotStatus.online then 
-        customizable.botStatics(""..getBot().name.." at another world??","Status Script : Running")
-        while not getBot():isInWorld(world:upper()) do
-            getBot():sendPacket(3,"action|join_request\nname|"..world:upper().."\ninvitedWorld|0")
-            sleep(delaywarp * 1000)
-        end
-        if id ~= "" then
-            while getTile(getBot().x,getBot().y).fg == 6 do
-                getBot():sendPacket(3,"action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0")
-                sleep(delaywarp * 1000)
-            end
-        end
-        if x and y then
-            while getBot().x ~= x or getBot().y ~= y do
-                getBot():findPath(x,y)
-                sleep(150)
-            end
-        end
-        customizable.botStatics(""..getBot().name.." success to joining world again","Status Script : Running")
-    end
-    if getBot().status ~= BotStatus.online then
-        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
+    if not getBot():isInWorld(world:upper()) or getBot().status ~= BotStatus.online then
+        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().." Current : "..getWorld().name.."","Status Script : Running")
+        ::back::
         while getBot().status ~= BotStatus.online do
             getBot():connect()
             if getBot().status == BotStatus.account_banned then
@@ -208,9 +189,16 @@ customizable.reconnect = function(world,id,x,y)
                 sleep(delayreconnect * 1000)
             end
         end
+        local count = 0
         while not getBot():isInWorld(world:upper()) do
             getBot():sendPacket(3,"action|join_request\nname|"..world:upper().."\ninvitedWorld|0")
             sleep(delaywarp * 1000)
+            count = count + 1
+            if count >= 5 then
+                getBot():disconnect()
+                sleep(2000)
+                goto back
+            end
         end
         if id ~= "" then
             while getTile(getBot().x,getBot().y).fg == 6 do
@@ -224,7 +212,7 @@ customizable.reconnect = function(world,id,x,y)
                 sleep(150)
             end
         end
-        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
+        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().." Current : "..getWorld().name.."","Status Script : Running")
     end
 end
 
