@@ -232,6 +232,10 @@ customizable.warp = function(world,door)
                 getBot():disconnect()
                 sleep(2000)
             end
+            if getBot():isInWorld("EXIT") and not subserver and not nuked then
+                getBot():disconnect()
+                sleep(2000)
+            end
             if getBot().status ~= BotStatus.online then
                 customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
                 while getBot().status ~= BotStatus.online do
@@ -265,6 +269,10 @@ customizable.warp = function(world,door)
             local stuck = 0
             while getTile(getBot().x,getBot().y).fg == 6 and not wrong do
                 if getBot().status == BotStatus.online and getBot():getPing() == 0 then
+                    getBot():disconnect()
+                    sleep(2000)
+                end
+                if getBot():isInWorld("EXIT") and not subserver and not nuked then
                     getBot():disconnect()
                     sleep(2000)
                 end
