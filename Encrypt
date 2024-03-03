@@ -191,12 +191,12 @@ customizable.reconnect = function(world,id,x,y)
             end
         end
         while not getBot():isInWorld(world:upper()) do
-            getBot():sendPacket(3,"action|join_request\nname|"..world:upper().."\ninvitedWorld|0")
+            getBot():warp(world:upper())
             sleep(delaywarp * 1000)
         end
         if id ~= "" then
             while getTile(getBot().x,getBot().y).fg == 6 do
-                getBot():sendPacket(3,"action|join_request\nname|" ..world:upper().."|"..id:upper().."\ninvitedWorld|0")
+                getBot():warp(world:upper(),id:upper())
                 sleep(delaywarp * 1000)
             end
         end
@@ -232,10 +232,6 @@ customizable.warp = function(world,door)
                 getBot():disconnect()
                 sleep(2000)
             end
-            if getBot():isInWorld("EXIT") and not subserver and not nuked then
-                getBot():disconnect()
-                sleep(2000)
-            end
             if getBot().status ~= BotStatus.online then
                 customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
                 while getBot().status ~= BotStatus.online do
@@ -252,7 +248,7 @@ customizable.warp = function(world,door)
                 end
                 customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
             end
-            getBot():sendPacket(3,"action|join_request\nname|"..name.."\ninvitedWorld|0")
+            getBot():warp(name)
             listenEvents(3)
             count = count + 1
             if count < 5 then
@@ -272,10 +268,6 @@ customizable.warp = function(world,door)
                     getBot():disconnect()
                     sleep(2000)
                 end
-                if getBot():isInWorld("EXIT") and not subserver and not nuked then
-                    getBot():disconnect()
-                    sleep(2000)
-                end
                 if getBot().status ~= BotStatus.online then
                     customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
                     while getBot().status ~= BotStatus.online do
@@ -292,7 +284,7 @@ customizable.warp = function(world,door)
                     end
                     customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
                 end
-                getBot():sendPacket(3,"action|join_request\nname|"..name.."\ninvitedWorld|0")
+                getBot():warp(name)
                 sleep(delaywarp * 1000)
                 stuck = stuck + 1
                 if stuck == 5 then
