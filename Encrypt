@@ -102,72 +102,25 @@ end
 
 customizable.initializeBots = function()
 	if linkbotinfo ~= "x" then
-        local text = [[
-            $webHookUrl = "]]..linkbotinfo..[[/messages/]]..messageidbotinfo..[["
-            $payload = @{
-                username = "Caramoy's"
-                embeds = @(
-                    @{
-                        title = "Caramoy Syndicate [https://discord.com/invite/fTTKW8vvuq]"
-                        color = "]]..math.random(111111,999999)..[["
-                        fields = @(
-                            @{
-                                name = "World Take"
-                                value = "]]..customizable.initOnStorage()..[["
-                                inline = "false"
-                            }
-                            @{
-                                name = "World Drop"
-                                value = "]]..customizable.initOutStorage()..[["
-                                inline = "false"
-                            }
-                        )
-                        footer = @{
-                            text = "[Lucifer] : Move WTW Script`nLast update : ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[["
-                        }
-                    }
-                )
-            }
-            
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Invoke-RestMethod -Uri $webHookUrl -Body ($payload | ConvertTo-Json -Depth 4) -Method Patch -ContentType 'application/json'
-        ]]
-        local pipe = io.popen("powershell -command -", "w")
-        pipe:write(text)
-        pipe:close()
+        local webhook = Webhook.new(linkbotinfo)
+        webhook.embed1.use = true
+        webhook.embed1.title = "Caramoy Syndicate [https://discord.com/invite/fTTKW8vvuq]"
+        webhook.embed1.color = math.random(111111,999999)
+        webhook.embed1:addField("World Take",customizable.initOnStorage(),true)
+        webhook.embed1:addField("World Drop",customizable.initOutStorage(),true)
+        webhook.embed1.footer.text = "[Lucifer] : Move WTW Script\nLast update : "..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..""
+        webhook:edit(messageidbotinfo)
     end
 end
 
 customizable.botStatics = function(text,execution)
     if webhookstatuslink ~= "x"  then
-        text = [[
-            $webHookUrl = "]]..webhookstatuslink..[["
-            $payload = @{
-                username = "Caramoy's"
-                "content" = "@everyone"
-                embeds = @(
-                    @{
-                        color = "]]..math.random(111111,999999)..[["
-                        fields = @(
-                            @{
-                                name = ""
-                                value = "]]..text..[["
-                                inline = "false"
-                            }
-                        )
-                        footer = @{
-                            text = "]]..execution..[["
-                        }
-                    }
-                )
-            }
-            
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Invoke-RestMethod -Uri $webHookUrl -Body ($payload | ConvertTo-Json -Depth 4) -Method Post -ContentType "application/json"
-        ]]
-        local file = io.popen("powershell -command -", "w")
-        file:write(text)
-        file:close()
+        local webhook = Webhook.new(webhookstatuslink)
+        webhook.content = "@everyone"
+        webhook.embed1.use = true
+        webhook.embed1:addField("",text,false)
+        webhook.embed1.footer.text = execution
+        webhook:send()
     end
 end
 
