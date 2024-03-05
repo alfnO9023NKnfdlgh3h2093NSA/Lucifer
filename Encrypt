@@ -200,10 +200,10 @@ customizable.warp = function(world,door)
             end
             getBot():warp(name)
             listenEvents(3)
+            sleep(delaywarp * 1000)
             count = count + 1
-            if count < 5 then
-                sleep(delaywarp * 1000)
-            else
+            if count == 5 then
+                count = 0
                 sleep(delayidiotserver * 60000)
             end
         end
