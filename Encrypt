@@ -412,9 +412,11 @@ customizable.onStoring = function()
         end
     end
     initialize[world] = ""..customizable.itemFloat(itemId[1]).."x"
+    customizable.onTake()
 end
 
 customizable.onTake = function()
+    ::back::
     for i = customizable.indexTake, #storagetake do
         print("["..pcallBot.."]Taking items")
         world = customizable.split(storagetake[i],"[^|]+")[1]
@@ -423,11 +425,11 @@ customizable.onTake = function()
         customizable.initializeBots()
         if not nuked then
             if not wrong then
-                if not looping then
-                    if customizable.itemFloat(itemId[1]) < amountTake then
-                        initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (More less than amount take)"
-                        customizable.botStatics("Take storage : ||"..world.."|| has empty, skipped world","Status Script : Running")
-                        print("["..pcallBot.."]Take storage : ("..world..") has empty, skipped world")
+                if customizable.itemFloat(itemId[1]) < amountTake then
+                    initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (More less than amount take)"
+                    customizable.botStatics("Take storage : ||"..world.."|| has empty, skipped world","Status Script : Running")
+                    print("["..pcallBot.."]Take storage : ("..world..") has empty, skipped world")
+                    if not looping then
                         customizable.indexTake = customizable.indexTake + 1
                         if customizable.indexTake > #storagetake then
                             initialize[world] = ""..customizable.itemFloat(itemId[1]).."x (More less than amount take)"
@@ -443,44 +445,39 @@ customizable.onTake = function()
                             getBot():stopScript()
                         end
                     else
-                        for _, pack in pairs(itemId) do
-                            local count = 0
-                            while getBot():getInventory():getItemCount(pack) < amountTake do
-                                for _, object in pairs(getBot():getWorld():getObjects()) do
-                                    if object.id == pack then
-                                        getBot():findPath(math.floor((object.x)/32), math.floor((object.y)/32))
-                                        sleep(100)
-                                        getBot():collect(3)
-                                        sleep(500)
-                                        customizable.reconnect(world,door,math.floor((object.x)/32), math.floor((object.y)/32))
-                                        break
-                                    end
-                                end
-                                if getBot():getInventory():getItemCount(pack) >= amountTake then
-                                    break
-                                else
-                                    count = count + 1
-                                    if count == 3 then
-                                        break
-                                    end
-                                end
+                        if #storagetake == 1 then
+                            sleep(delaylooping * 1000)
+                            goto back
+                        else
+                            sleep(delaylooping * 1000)
+                            customizable.indexTake = customizable.indexTake + 1
+                            if customizable.indexTake > #storagetake then
+                                customizable.indexTake = 1
+                                goto back
                             end
                         end
-                        sleep(100)
-                        break
                     end
                 else
                     for _, pack in pairs(itemId) do
-                        for _, object in pairs(getBot():getWorld():getObjects()) do
-                            if object.id == pack then
-                                getBot():findPath(math.floor((object.x)/32), math.floor((object.y)/32))
-                                sleep(100)
-                                getBot():collect(3)
-                                sleep(500)
-                                customizable.reconnect(world,door,math.floor((object.x)/32), math.floor((object.y)/32))
+                        local count = 0
+                        while getBot():getInventory():getItemCount(pack) < amountTake do
+                            for _, object in pairs(getBot():getWorld():getObjects()) do
+                                if object.id == pack then
+                                    getBot():findPath(math.floor((object.x)/32), math.floor((object.y)/32))
+                                    sleep(100)
+                                    getBot():collect(3)
+                                    sleep(500)
+                                    customizable.reconnect(world,door,math.floor((object.x)/32), math.floor((object.y)/32))
+                                    break
+                                end
                             end
                             if getBot():getInventory():getItemCount(pack) >= amountTake then
                                 break
+                            else
+                                count = count + 1
+                                if count == 3 then
+                                    break
+                                end
                             end
                         end
                     end
@@ -525,11 +522,12 @@ customizable.onTake = function()
         end
     end
     initialize[world] = ""..customizable.itemFloat(itemId[1]).."x"
+    customizable.onStoring()
 end
 
-customizable.realizm = function()
-    for idx, val in pairs(itemId) do
-        if getBot():getInventory():getItemCount(val) > amountTake then
+customizable.detectTable = function(items,amt)
+    for _, init in pairs(items) do
+        if getBot():getInventory():getItemCount(init) >= amt then
             return true
         end
     end
@@ -543,17 +541,10 @@ if Information == "Script Move WTW made by Caramoy Syndicate, Link Server : http
         sleep(delayreconnect * 1000)
     end
     sleep(pcallBot * delayexecute * 1000)
-    while true do
-        if not looping then
-            customizable.onTake()
-            customizable.onStoring()
-        else
-            while not customizable.realizm() do
-                customizable.onTake()
-                sleep(delaylooping * 1000)
-            end
-            customizable.onStoring()
-        end
+    if customizable.detectTable(itemId,amountTake) then
+        customizable.onStoring()
+    else
+        customizable.onTake()
     end
 else
     customizable.botStatics("Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq","Status Script : Stopped, Reason : Reseller idiot")
