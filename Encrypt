@@ -199,11 +199,12 @@ customizable.warp = function(world,door)
                 customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
             end
             getBot():warp(name)
-            listenEvents(3)
-            sleep(delaywarp * 1000)
+            listenEvents(delaywarp)
             count = count + 1
             if count == 5 then
                 count = 0
+                customizable.botStatics(""..getBot().name.." : Maybe hard warp?, disconnecting bot and sleeping for "..delayidiotserver.." minutes","Status Script : Running")
+                getBot():disconnect()
                 sleep(delayidiotserver * 60000)
             end
         end
