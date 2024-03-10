@@ -388,6 +388,7 @@ customizable.onStoring = function()
                     else
                         customizable.warp(customizable.randomLetter(),"")
                     end
+                    customizable.initializeBots()
                     customizable.notifications("["..pcallBot.."]All drop storage has reached limit")
                     getBot():stopScript()
                 end
@@ -407,6 +408,7 @@ customizable.onStoring = function()
                 else
                     customizable.warp(customizable.randomLetter(),"")
                 end
+                customizable.initializeBots()
                 customizable.notifications("["..pcallBot.."]All drop storage has reached limit!")
                 getBot():stopScript()
             end
@@ -499,6 +501,7 @@ customizable.onTake = function()
                     else
                         customizable.warp(customizable.randomLetter(),"")
                     end
+                    customizable.initializeBots()
                     customizable.notifications("["..pcallBot.."]All take storage has empty")
                     getBot():stopScript()
                 end
@@ -517,6 +520,7 @@ customizable.onTake = function()
                 else
                     customizable.warp(customizable.randomLetter(),"")
                 end
+                customizable.initializeBots()
                 customizable.notifications("["..pcallBot.."]All take storage has empty!")
                 getBot():stopScript()
             end
