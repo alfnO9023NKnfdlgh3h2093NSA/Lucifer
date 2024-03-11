@@ -6,7 +6,6 @@ end
 
 bot = getBot()
 inventory = getBot():getInventory()
-stats = getBot().status
 bot.auto_collect = false
 bot.auto_reconnect = false
 initialize = {}
@@ -49,17 +48,17 @@ customizable.split = function(str,ptr)
 end
 
 customizable.enet = function()
-    if stats == BotStatus.online then
+    if bot.status == BotStatus.online then
         return 'Online'
-    elseif stats == BotStatus.account_banned then
+    elseif bot.status == BotStatus.account_banned then
         return 'Suspended'
-    elseif stats == BotStatus.error_connecting then
+    elseif bot.status == BotStatus.error_connecting then
         return 'Ercon'
-    elseif stats == BotStatus.maintenance then
+    elseif bot.status == BotStatus.maintenance then
         return 'Maintenance'
-    elseif stats == BotStatus.changing_subserver then
+    elseif bot.status == BotStatus.changing_subserver then
         return 'Changing Subserver'
-    elseif stats == BotStatus.location_banned then
+    elseif bot.status == BotStatus.location_banned then
         return 'Locban'
     else
         return 'Offline'
@@ -114,19 +113,19 @@ customizable.initializeBots = function(text)
 end
 
 customizable.reconnect = function(world,id,x,y)
-    if stats == BotStatus.online and bot:getPing() == 0 then
+    if bot.status == BotStatus.online and bot:getPing() == 0 then
         bot:disconnect()
         sleep(2000)
     end
-    if not bot:isInWorld(world:upper()) or stats ~= BotStatus.online then
+    if not bot:isInWorld(world:upper()) or bot.status ~= BotStatus.online then
         customizable.initializeBots(''..bot.name..' status is '..customizable.enet()..' Current : '..bot:getWorld().name..'')
-        while stats ~= BotStatus.online do
+        while bot.status ~= BotStatus.online do
             bot:connect()
-            if stats == BotStatus.account_banned then
+            if bot.status == BotStatus.account_banned then
                 customizable.initializeBots(''..bot.name..' status is '..customizable.enet()..', Script terminated.')
                 bot:stopScript()
             end
-            if stats == BotStatus.maintenance then
+            if bot.status == BotStatus.maintenance then
                 sleep(delaymaintenance * 60000)
             else
                 sleep(delayreconnect * 1000)
@@ -167,19 +166,19 @@ customizable.warp = function(world,door)
             end
         end)
         while not bot:isInWorld(world:upper()) and not nuked do
-            if stats == BotStatus.online and bot:getPing() == 0 then
+            if bot.status == BotStatus.online and bot:getPing() == 0 then
                 bot:disconnect()
                 sleep(2000)
             end
-            if stats ~= BotStatus.online then
+            if bot.status ~= BotStatus.online then
                 customizable.initializeBots(''..bot.name..' status is '..customizable.enet()..'')
-                while stats ~= BotStatus.online do
+                while bot.status ~= BotStatus.online do
                     bot:connect()
-                    if stats == BotStatus.account_banned then
+                    if bot.status == BotStatus.account_banned then
                         customizable.initializeBots(''..bot.name..' status is '..customizable.enet()..', Script terminated.')
                         bot:stopScript()
                     end
-                    if stats == BotStatus.maintenance then
+                    if bot.status == BotStatus.maintenance then
                         sleep(delaymaintenance * 60000)
                     else
                         sleep(delayreconnect * 1000)
@@ -204,19 +203,19 @@ customizable.warp = function(world,door)
         if door ~= '' then
             local stuck = 0
             while getTile(bot.x,bot.y).fg == 6 and not wrong do
-                if stats == BotStatus.online and bot:getPing() == 0 then
+                if bot.status == BotStatus.online and bot:getPing() == 0 then
                     bot:disconnect()
                     sleep(2000)
                 end
-                if stats ~= BotStatus.online then
+                if bot.status ~= BotStatus.online then
                     customizable.initializeBots(''..bot.name..' status is '..customizable.enet()..'')
-                    while stats ~= BotStatus.online do
+                    while bot.status ~= BotStatus.online do
                         bot:connect()
-                        if stats == BotStatus.account_banned then
+                        if bot.status == BotStatus.account_banned then
                             customizable.initializeBots(''..bot.name..' status is '..customizable.enet()..', Script terminated.')
                             bot:stopScript()
                         end
-                        if stats == BotStatus.maintenance then
+                        if bot.status == BotStatus.maintenance then
                             sleep(delaymaintenance * 60000)
                         else
                             sleep(delayreconnect * 1000)
@@ -531,7 +530,7 @@ customizable.itemChecking = function(items,amt)
 end
 
 if Information == 'Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq' and scriptVersion == '0.2' then
-    while stats ~= BotStatus.online do
+    while bot.status ~= BotStatus.online do
         bot:connect()
         sleep(delayreconnect * 1000)
     end
