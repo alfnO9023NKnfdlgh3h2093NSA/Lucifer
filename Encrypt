@@ -234,7 +234,7 @@ customizable.warp = function(world,door)
     end
 end
 
-customizable.floatDetect = function(x,y,num)
+customizable.floatDetect = function(x,y)
     local stack = 0, 0
     for _,obj in pairs(getObjects()) do
         if math.floor(obj.x / 32) == x and math.floor(obj.y / 32) == y then
