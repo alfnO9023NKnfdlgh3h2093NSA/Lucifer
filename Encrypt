@@ -11,7 +11,7 @@ for index, botname in pairs(getBots()) do
 end
 
 bot.auto_reconnect = true
-bot.collect_range = 1
+bot.collect_range = 3
 initialize = {}
 local customizable = {
     index = 1,
