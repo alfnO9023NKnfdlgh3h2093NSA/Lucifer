@@ -1,4 +1,3 @@
-
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
@@ -11,7 +10,6 @@ for index, botname in pairs(getBots()) do
 end
 
 bot.auto_reconnect = true
-bot.collect_range = 10
 initialize = {}
 local customizable = {
     index = 1,
@@ -249,7 +247,7 @@ forSeparated = function(x,y)
     return false
 end
 
-local dropItem = function()
+dropItem = function()
     printed:append('Drop Items')
     for i = customizable.indexDrop , #storagedrop do
         world = split(storagedrop[i],'[^|]+')[1]
@@ -443,9 +441,23 @@ takeItem = function()
                     end
                 else
                     for _, pack in pairs(itemId) do
-                        while bot:collectByID(pack) do
-                            sleep(500)
-                            reconnect(world,door,bot.x,bot.y)
+                        count = 0
+                        while inventory:getItemCount(pack) < 200 do
+                            for _, obj in pairs(bot:getWorld():getObjects()) do
+                                if obj.id == pack and (#bot:getPath((obj.x + 10) // 32, (obj.y + 10) // 32) > 0) then
+                                    bot:findPath(math.floor(obj.x + 10) // 32, math.floor(obj.y + 10) // 32)
+                                    sleep(1000)
+                                    bot:collect(3)
+                                    sleep(1000)
+                                    reconnect(world,door,math.floor(obj.x + 10) // 32, math.floor(obj.y + 10) // 32)
+                                    break
+                                end
+                            end
+                            count = count + 1
+                            if count == 5 then
+                                count = 0
+                                break
+                            end
                         end
                     end
                     sleep(100)
