@@ -256,6 +256,7 @@ dropItem = function()
         if not nuked then
             if not wrong then
                 storageInfo()
+                ::loops::
                 if itemFloat(itemId[1]) >= limit then
                     initialize[world] = ''..itemFloat(itemId[1])..'x [LIMIT]'
                     textInfo('','Storage drop : '..world..' has reached limit, Skipped world')
@@ -281,7 +282,7 @@ dropItem = function()
                                         ::back::
                                         while not bot:isInTile(customizable.dropX + (customizable.tileX),customizable.dropY) do
                                             bot:findPath(customizable.dropX + (customizable.tileX),customizable.dropY)
-                                            sleep(250)
+                                            sleep(math.random(100,1000))
                                             reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY)
                                         end
                                         if customizable.dropX + (customizable.tileX) >= 98 then
@@ -292,36 +293,44 @@ dropItem = function()
                                             customizable.tileX = customizable.tileX + 1
                                             goto back
                                         end
-                                        while inventory:getItemCount(pack) > 0 do
-                                            bot:setDirection(true)
-                                            sleep(250)
-                                            bot:drop(pack,200)
-                                            sleep(delaydrop * 1000)
-                                            reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY)
+                                        if itemFloat(itemId[1]) >= limit then
+                                            goto loops
+                                        else
+                                            while inventory:getItemCount(pack) > 0 do
+                                                bot:setDirection(true)
+                                                sleep(250)
+                                                bot:drop(pack,200)
+                                                sleep(delaydrop * 1000)
+                                                reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY)
+                                            end
                                         end
                                     end
                                 else
-                                     if tile.fg == 0 then
+                                    if tile.fg == 0 then
                                         ::back::
-                                        while not bot:isInTile(customizable.dropX + (customizable.tileX),customizable.dropY - (y-1)) do
-                                            bot:findPath(customizable.dropX + (customizable.tileX),customizable.dropY - (y-1))
-                                            sleep(250)
-                                            reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY - (y-1))
+                                        while not bot:isInTile(customizable.dropX + ((y + 1) + (customizable.tileX)),customizable.dropY) do
+                                            bot:findPath(customizable.dropX + ((y + 1) + (customizable.tileX)),customizable.dropY)
+                                            sleep(math.random(100,1000))
+                                            reconnect(world,door,customizable.dropX + ((y + 1) + (customizable.tileX)),customizable.dropY)
                                         end
                                         if customizable.dropX + (customizable.tileX) >= 98 then
                                             customizable.dropY = customizable.dropY - #itemId
                                             customizable.tileX = 0
                                         end
-                                        if forSeparated(bot.x -1, bot.y) then
-                                            customizable.tileX = customizable.tileX + 1
+                                        if forSeparated(bot.x-1, bot.y) then
+                                            customizable.dropY = customizable.dropY - 1
                                             goto back
                                         end
-                                        while inventory:getItemCount(pack) > 0 do
-                                            bot:setDirection(true)
-                                            sleep(250)
-                                            bot:drop(pack,200)
-                                            sleep(delaydrop * 1000)
-                                            reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY - (y-1))
+                                        if itemFloat(itemId[1]) >= limit then
+                                            goto loops
+                                        else 
+                                            while inventory:getItemCount(pack) > 0 do
+                                                bot:setDirection(true)
+                                                sleep(250)
+                                                bot:drop(pack,200)
+                                                sleep(delaydrop * 1000)
+                                                reconnect(world,door,customizable.dropX + ((y + 1) + (customizable.tileX)),customizable.dropY)
+                                            end
                                         end
                                     end
                                 end
@@ -330,25 +339,29 @@ dropItem = function()
                                     ::back::
                                     while not bot:isInTile(customizable.dropX + (customizable.tileX),customizable.dropY) do
                                         bot:findPath(customizable.dropX + (customizable.tileX),customizable.dropY)
-                                        sleep(250)
+                                        sleep(math.random(100,1000))
                                         reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY)
                                     end
                                     if customizable.dropX + (customizable.tileX) >= 98 then
                                         customizable.dropY = customizable.dropY - 1
                                         customizable.tileX = 0
                                     end
-                                    count = 0
-                                    while inventory:getItemCount(pack) > 0 do
-                                        bot:setDirection(true)
-                                        sleep(250)
-                                        bot:drop(pack,200)
-                                        sleep(delaydrop * 1000)
-                                        reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY)
-                                        count = count + 1
-                                        if count >= 2 then
-                                            count = 0
-                                            customizable.tileX = customizable.tileX + 1
-                                            goto back
+                                    if itemFloat(itemId[1]) >= limit then
+                                        goto loops
+                                    else
+                                        count = 0
+                                        while inventory:getItemCount(pack) > 0 do
+                                            bot:setDirection(true)
+                                            sleep(250)
+                                            bot:drop(pack,200)
+                                            sleep(delaydrop * 1000)
+                                            reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY)
+                                            count = count + 1
+                                            if count >= 2 then
+                                                count = 0
+                                                customizable.tileX = customizable.tileX + 1
+                                                goto back
+                                            end
                                         end
                                     end
                                 end
