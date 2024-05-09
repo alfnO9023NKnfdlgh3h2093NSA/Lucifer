@@ -1,7 +1,7 @@
+
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
-local strGenerate = ''
 
 for index, botname in pairs(getBots()) do
     if bot.name:upper() == botname.name:upper() then
@@ -12,13 +12,13 @@ end
 bot.auto_reconnect = true
 initialize = {}
 local customizable = {
-    index = 1,
-    indexDrop = 1,
     indexTake = 1,
+    indexDrop = 1,
     tileX = 0,
-    dropX = posX - 1,
-    dropY = posY - 1
+    tileY = 0
 }
+local sleeping = delayexecute * 1000
+
 local events = {
     nukeds = function(variant,netid)
         if variant:get(0):getString() == 'OnConsoleMessage' then
@@ -29,12 +29,18 @@ local events = {
         end
     end
 }
-for i = 1,15 do
-    strGenerate = strGenerate..string.char(math.random(97,122))
-end
 
 itemFloat = function(id)
     return bot:getWorld().growscan:getObjects()[id] or 0
+end
+
+checkingForItems = function()
+    for _, list in pairs(itemId) do
+        if inventory:getItemCount(list) >= 200 then
+            return true
+        end
+    end
+    return false
 end
 
 notifications = function(description)
@@ -179,7 +185,7 @@ reconnect = function(world,id,x,y)
             listenEvents(5)
             sleep(delaywarp * 1000)
         end
-        removeEvent(Event.variantlist)
+        removeEvents()
     end
     if bot:isInWorld(world:upper()) then
         if id ~= '' then
@@ -218,7 +224,7 @@ warp = function(world,door)
                 sleep(delayidiotserver * 60000)
             end
         end
-        removeEvent(Event.variantlist)
+        removeEvents()
     end
     if bot:isInWorld(world:upper()) and door ~= '' then
         local stuck  = 0
@@ -232,6 +238,29 @@ warp = function(world,door)
             end
         end
     end
+end
+
+storageDesc = function(text,text2)
+    storageInfo()
+    while bot:isInWorld() and bot.status == BotStatus.online do
+        bot:leaveWorld()
+        sleep(5000)
+    end
+    if removingbot then
+        removeBot()
+        sleep(2000)
+    end
+    textInfo('stop','All '..text..' storage has '..text2..', Script terminated.')
+end
+
+checkPosObject = function()
+    local count = 0
+    for _, tile in pairs(bot:getWorld():getTiles()) do
+        if tile.fg == posId or tile.bg == posId then
+            count = count + 1
+        end
+    end
+    return count
 end
 
 forSeparated = function(x,y)
@@ -249,7 +278,7 @@ end
 
 dropItem = function()
     printed:append('Drop Items')
-    for i = customizable.indexDrop , #storagedrop do
+    for i = customizable.indexDrop, #storagedrop do
         world = split(storagedrop[i],'[^|]+')[1]
         door = split(storagedrop[i],'[^|]+')[2]
         warp(world,door)
@@ -262,32 +291,28 @@ dropItem = function()
                     textInfo('','Storage drop : '..world..' has reached limit, Skipped world')
                     customizable.indexDrop = customizable.indexDrop + 1
                     customizable.tileX = 0
+                    customizable.tileY = 0
                     if customizable.indexDrop > #storagedrop then
-                        initialize[world] = ''..itemFloat(itemId[1])..'x [LIMIT]'
-                        storageInfo()
-                        if removingbot then
-                            removeBot()
-                            sleep(2000)
-                        else
-                            warp(strGenerate,'')
-                        end
-                        textInfo('stop','All storage drop are limit, Script terminated.')
+                        storageDesc('drop','reached limit')
                     end
                 else
+                    if checkPosObject() == 0 then
+                        textInfo('stop','Cant find to position, check ur pos id configs')
+                    end
                     for y, pack in pairs(itemId) do
                         for i, tile in pairs(bot:getWorld():getTiles()) do
-                            if separated then
-                                if #itemId == 1 then
-                                    if tile.fg == 0 then
+                            if tile.fg == posId or tile.bg == posId then
+                                if separated then
+                                    if #itemId == 1 then
                                         ::back::
-                                        while not bot:isInTile(customizable.dropX + (customizable.tileX),customizable.dropY) do
-                                            bot:findPath(customizable.dropX + (customizable.tileX),customizable.dropY)
-                                            sleep(math.random(100,1000))
-                                            reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY)
-                                        end
-                                        if customizable.dropX + (customizable.tileX) >= 98 then
-                                            customizable.dropY = customizable.dropY - 1
+                                        bot:findPath(tile.x + (customizable.tileX),tile.y - (customizable.tileY))
+                                        sleep(100)
+                                        reconnect(world,door,tile.x + (customizable.tileX),tile.y - (customizable.tileY))
+                                        if tile.x + (customizable.tileX) >= 98 then
+                                            initialize[world] = ''..itemFloat(itemId[1])..'x [LIMIT]'
+                                            customizable.tileY = customizable.tileY + 1
                                             customizable.tileX = 0
+                                            break
                                         end
                                         if forSeparated(bot.x -1, bot.y) then
                                             customizable.tileX = customizable.tileX + 1
@@ -298,27 +323,28 @@ dropItem = function()
                                         else
                                             while inventory:getItemCount(pack) > 0 do
                                                 bot:setDirection(true)
-                                                sleep(250)
+                                                sleep(500)
                                                 bot:drop(pack,200)
                                                 sleep(delaydrop * 1000)
-                                                reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY)
+                                                reconnect(world,door,tile.x + (customizable.tileX),tile.y - (customizable.tileY))
                                             end
                                         end
-                                    end
-                                else
-                                    if tile.fg == 0 then
+                                    else
                                         ::back::
-                                        while not bot:isInTile(customizable.dropX + ((y + 1) + (customizable.tileX)),customizable.dropY) do
-                                            bot:findPath(customizable.dropX + ((y + 1) + (customizable.tileX)),customizable.dropY)
-                                            sleep(math.random(100,1000))
-                                            reconnect(world,door,customizable.dropX + ((y + 1) + (customizable.tileX)),customizable.dropY)
+                                        bot:findPath(tile.x + (y-1),tile.y - (customizable.tileY))
+                                        sleep(100)
+                                        reconnect(world,door,tile.x + (y-1),tile.y - (customizable.tileY))
+                                        if tile.y - (customizable.tileY) == 0 then
+                                            initialize[world] = ''..itemFloat(itemId[1])..'x [Drop Failed]'
+                                            textInfo('','Cant drop cuz bot at coordinate y = 0, skipped world')
+                                            customizable.indexDrop = customizable.indexDrop + 1
+                                            customizable.tileY = 0
+                                            if customizable.indexDrop > #storagedrop then
+                                                storageDesc('drop','reached limit')
+                                            end
                                         end
-                                        if customizable.dropX + (customizable.tileX) >= 98 then
-                                            customizable.dropY = customizable.dropY - #itemId
-                                            customizable.tileX = 0
-                                        end
-                                        if forSeparated(bot.x-1, bot.y) then
-                                            customizable.dropY = customizable.dropY - 1
+                                        if forSeparated(bot.x -1, bot.y) then
+                                            customizable.tileY = customizable.tileY + 1
                                             goto back
                                         end
                                         if itemFloat(itemId[1]) >= limit then
@@ -326,25 +352,22 @@ dropItem = function()
                                         else 
                                             while inventory:getItemCount(pack) > 0 do
                                                 bot:setDirection(true)
-                                                sleep(250)
+                                                sleep(500)
                                                 bot:drop(pack,200)
                                                 sleep(delaydrop * 1000)
-                                                reconnect(world,door,customizable.dropX + ((y + 1) + (customizable.tileX)),customizable.dropY)
+                                                reconnect(world,door,tile.x + (y-1),tile.y - (customizable.tileY))
                                             end
                                         end
                                     end
-                                end
-                            else
-                                if tile.fg == 0 then
+                                else
                                     ::back::
-                                    while not bot:isInTile(customizable.dropX + (customizable.tileX),customizable.dropY) do
-                                        bot:findPath(customizable.dropX + (customizable.tileX),customizable.dropY)
-                                        sleep(math.random(100,1000))
-                                        reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY)
-                                    end
-                                    if customizable.dropX + (customizable.tileX) >= 98 then
-                                        customizable.dropY = customizable.dropY - 1
+                                    bot:findPath(tile.x + (customizable.tileX),tile.y - (customizable.tileY))
+                                    sleep(100)
+                                    reconnect(world,door,tile.x + (customizable.tileX),tile.y - (customizable.tileY))
+                                    if tile.x + (customizable.tileX) >= 98 then
+                                        customizable.tileY = customizable.tileY + 1
                                         customizable.tileX = 0
+                                        goto back
                                     end
                                     if itemFloat(itemId[1]) >= limit then
                                         goto loops
@@ -355,7 +378,7 @@ dropItem = function()
                                             sleep(250)
                                             bot:drop(pack,200)
                                             sleep(delaydrop * 1000)
-                                            reconnect(world,door,customizable.dropX + (customizable.tileX),customizable.dropY)
+                                            reconnect(world,door,tile.x + (customizable.tileX),tile.y - (customizable.tileY))
                                             count = count + 1
                                             if count >= 2 then
                                                 count = 0
@@ -380,15 +403,9 @@ dropItem = function()
                 textInfo('','Storage drop : '..world..' is wrong door, Skipped world')
                 customizable.indexDrop = customizable.indexDrop + 1
                 customizable.tileX = 0
+                customizable.tileX = 0
                 if customizable.indexDrop > #storagedrop then
-                    if removingbot then
-                        removeBot()
-                        sleep(2000)
-                    else
-                        warp(strGenerate,'')
-                    end
-                    storageInfo()
-                    textInfo('stop','All storage drop has reached limit')
+                    storageDesc('drop','reached limit')
                 end
             end
         else
@@ -397,123 +414,92 @@ dropItem = function()
             textInfo('','storage drop : '..world..' is NUKED, Skipped world')
             customizable.indexDrop = customizable.indexDrop + 1
             customizable.tileX = 0
+            customizable.tileX = 0
             if customizable.indexDrop > #storagedrop then
-                if removingbot then
-                    removeBot()
-                    sleep(2000)
-                else
-                    warp(strGenerate,'')
-                end
-                storageInfo()
-                textInfo('stop','All storage drop has reached limit!')
+                storageDesc('drop','reached limit')
             end
         end
     end
     initialize[world] = ''..itemFloat(itemId[1])..'x'
 end
 
-
 takeItem = function()
-    printed:append('Take Item')
-    ::backs::
-    for i = customizable.indexTake, #storagetake do
-        world = split(storagetake[i],'[^|]+')[1]
-        door = split(storagetake[i],'[^|]+')[2]
-        warp(world,door)
-        if not nuked then
-            if not wrong then
-                storageInfo()
-                if itemFloat(itemId[1]) == 0 then
-                    initialize[world] = ''..itemFloat(itemId[1])..'x [EMPTY]'
-                    if not looping then
-                        textInfo('','Storage take : '..world..' are empty, Skipped world')
-                        customizable.indexTake = customizable.indexTake + 1
-                        if customizable.indexTake > #storagetake then
-                            initialize[world] = ''..itemFloat(itemId[1])..'x [EMPTY]'
-                            storageInfo()
-                            if removingbot then
-                                removeBot()
-                                sleep(2000)
-                            else
-                                warp(strGenerate,'')
+    if not checkingForItems() then
+        printed:append('Take Item')
+        ::loops::
+        for i = customizable.indexTake, #storagetake do
+            world = split(storagetake[i],'[^|]+')[1]
+            door = split(storagetake[i],'[^|]+')[2]
+            warp(world,door)
+            if not nuked then
+                if not wrong then
+                    storageInfo()
+                    if itemFloat(itemId[1]) == 0 then
+                        initialize[world] = ''..itemFloat(itemId[1])..'x [EMPTY]'
+                        if not looping then
+                            textInfo('','Storage take : '..world..' are empty, Skipped world')
+                            customizable.indexTake = customizable.indexTake + 1
+                            if customizable.indexTake > #storagetake then
+                                storageDesc('take','empty')
                             end
-                            textInfo('stop','All take storage has empty')
-                        end
-                    else
-                        if #storagetake == 1 then
-                            sleep(delaylooping * 1000)
-                            goto backs
                         else
-                            sleep(delaylooping * 1000)
                             customizable.indexTake = customizable.indexTake + 1
                             if customizable.indexTake > #storagetake then
                                 customizable.indexTake = 1
-                                goto backs
                             end
+                            sleep(delaylooping*1000)
+                            goto loops
                         end
-                    end
-                else
-                    for _, pack in pairs(itemId) do
-                        count = 0
-                        while inventory:getItemCount(pack) < 200 do
-                            for _, obj in pairs(bot:getWorld():getObjects()) do
-                                if obj.id == pack and (#bot:getPath((obj.x + 10) // 32, (obj.y + 10) // 32) > 0) then
-                                    bot:findPath(math.floor(obj.x + 10) // 32, math.floor(obj.y + 10) // 32)
-                                    sleep(1000)
-                                    bot:collect(3)
-                                    sleep(1000)
-                                    reconnect(world,door,math.floor(obj.x + 10) // 32, math.floor(obj.y + 10) // 32)
+                    else
+                        for _, pack in pairs(itemId) do
+                            count = 0
+                            while inventory:getItemCount(pack) < 200 do
+                                for _, obj in pairs(bot:getWorld():getObjects()) do
+                                    if obj.id == pack and (#bot:getPath((obj.x + 10) // 32, (obj.y + 10) // 32) > 0) then
+                                        bot:findPath(math.floor(obj.x + 10) // 32, math.floor(obj.y + 10) // 32)
+                                        sleep(1000)
+                                        bot:collect(3)
+                                        sleep(1000)
+                                        reconnect(world,door,math.floor(obj.x + 10) // 32, math.floor(obj.y + 10) // 32)
+                                        break
+                                    end
+                                end
+                                count = count + 1
+                                sleep(300)
+                                if count == 5 then
+                                    count = 0
                                     break
                                 end
                             end
-                            count = count + 1
-                            if count == 5 then
-                                count = 0
-                                break
-                            end
                         end
+                        sleep(100)
+                        break
                     end
-                    sleep(100)
-                    break
+                else
+                    initialize[world] = 'Wrong Door'
+                    wrong = false
+                    textInfo('','Storage take : '..world..' is wrong door id, Skipped world')
+                    customizable.indexTake = customizable.indexTake + 1
+                    if customizable.indexTake > #storagetake then
+                        storageDesc('take','empty')
+                    end
                 end
             else
-                initialize[world] = 'Wrong Door'
-                wrong = false
-                textInfo('','Storage take : '..world..' is wrong door id, Skipped world')
+                initialize[world] = 'Nuked'
+                nuked = false
+                textInfo('','Storage take : '..world..' NUKED, Skipped world.')
                 customizable.indexTake = customizable.indexTake + 1
                 if customizable.indexTake > #storagetake then
-                    if removingbot then
-                        removeBot()
-                        sleep(2000)
-                    else
-                        warp(strGenerate,'')
-                    end
-                    storageInfo()
-                    textInfo('stop','All take storage has empty')
+                    storageDesc('take','empty')
                 end
-            end
-        else
-            initialize[world] = 'Nuked'
-            nuked = false
-            textInfo('','Storage take : '..world..' NUKED, Skipped world.')
-            customizable.indexTake = customizable.indexTake + 1
-            if customizable.indexTake > #storagetake then
-                if removingbot then
-                    removeBot()
-                    sleep(2000)
-                else
-                    warp(strGenerate,'')
-                end
-                storageInfo()
-                textInfo('stop','All take storage has empty!')
             end
         end
+        initialize[world] = ''..itemFloat(itemId[1])..'x'
     end
-    initialize[world] = ''..itemFloat(itemId[1])..'x'
 end
 
 if Information == 'Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq' and scriptVersion == 'final_version[0.1]' then
-    sleep(pcallBot * delayexecute * 1000)
+    sleep(pcallBot * sleeping)
     while true do
         takeItem()
         dropItem()
