@@ -12,8 +12,6 @@ end
 bot.auto_reconnect = true
 initialize = {}
 local customizable = {
-    indexTake = 1,
-    indexDrop = 1,
     tileX = 0,
     tileY = 0
 }
@@ -241,7 +239,6 @@ warp = function(world,door)
 end
 
 storageDesc = function(text,text2)
-    storageInfo()
     while bot:isInWorld() and bot.status == BotStatus.online do
         bot:leaveWorld()
         sleep(5000)
@@ -276,11 +273,23 @@ forSeparated = function(x,y)
     return false
 end
 
+shuffle = function(tbl)
+    for i = #tbl, 2, -1 do
+        local j = math.random(i)
+        tbl[i], tbl[j] = tbl[j], tbl[i]
+    end
+    return tbl
+end
+dropNumeric = shuffle(storagedrop)
+takeNumeric = shuffle(storagetake)
+
 dropItem = function()
+    ::backs::
     printed:append('Drop Items')
-    for i = customizable.indexDrop, #storagedrop do
-        world = split(storagedrop[i],'[^|]+')[1]
-        door = split(storagedrop[i],'[^|]+')[2]
+    dropNumeric = shuffle(dropNumeric)
+    for i = #dropNumeric, 1, -1 do
+        parts = split(dropNumeric[i], '[^|]+')
+        world, door = parts[1], parts[2]
         warp(world,door)
         if not nuked then
             if not wrong then
@@ -289,10 +298,10 @@ dropItem = function()
                 if itemFloat(itemId[1]) >= limit then
                     initialize[world] = ''..itemFloat(itemId[1])..'x [LIMIT]'
                     textInfo('','Storage drop : '..world..' has reached limit, Skipped world')
-                    customizable.indexDrop = customizable.indexDrop + 1
+                    table.remove(dropNumeric,i)
                     customizable.tileX = 0
                     customizable.tileY = 0
-                    if customizable.indexDrop > #storagedrop then
+                    if #dropNumeric == 0 then
                         storageDesc('drop','reached limit')
                     end
                 else
@@ -337,11 +346,11 @@ dropItem = function()
                                         if tile.y - (customizable.tileY) == 0 then
                                             initialize[world] = ''..itemFloat(itemId[1])..'x [Drop Failed]'
                                             textInfo('','Cant drop cuz bot at coordinate y = 0, skipped world')
-                                            customizable.indexDrop = customizable.indexDrop + 1
-                                            customizable.tileY = 0
-                                            if customizable.indexDrop > #storagedrop then
+                                            table.remove(dropNumeric,i)
+                                            if #dropNumeric == 0 then
                                                 storageDesc('drop','reached limit')
                                             end
+                                            goto backs
                                         end
                                         if forSeparated(bot.x -1, bot.y) then
                                             customizable.tileY = customizable.tileY + 1
@@ -401,10 +410,10 @@ dropItem = function()
                 initialize[world] = 'Wrong Door'
                 wrong = false
                 textInfo('','Storage drop : '..world..' is wrong door, Skipped world')
-                customizable.indexDrop = customizable.indexDrop + 1
+                table.remove(dropNumeric,i)
                 customizable.tileX = 0
-                customizable.tileX = 0
-                if customizable.indexDrop > #storagedrop then
+                customizable.tileY = 0
+                if #dropNumeric == 0 then
                     storageDesc('drop','reached limit')
                 end
             end
@@ -412,10 +421,10 @@ dropItem = function()
             initialize[world] = 'Nuked'
             nuked = false
             textInfo('','storage drop : '..world..' is NUKED, Skipped world')
-            customizable.indexDrop = customizable.indexDrop + 1
+            table.remove(dropNumeric,i)
             customizable.tileX = 0
-            customizable.tileX = 0
-            if customizable.indexDrop > #storagedrop then
+            customizable.tileY = 0
+            if #dropNumeric == 0 then
                 storageDesc('drop','reached limit')
             end
         end
@@ -427,9 +436,10 @@ takeItem = function()
     if not checkingForItems() then
         printed:append('Take Item')
         ::loops::
-        for i = customizable.indexTake, #storagetake do
-            world = split(storagetake[i],'[^|]+')[1]
-            door = split(storagetake[i],'[^|]+')[2]
+        takeNumeric = shuffle(takeNumeric)
+        for i = #takeNumeric, 1, -1 do
+            parts = split(takeNumeric[i], '[^|]+')
+            world, door = parts[1], parts[2]
             warp(world,door)
             if not nuked then
                 if not wrong then
@@ -438,15 +448,11 @@ takeItem = function()
                         initialize[world] = ''..itemFloat(itemId[1])..'x [EMPTY]'
                         if not looping then
                             textInfo('','Storage take : '..world..' are empty, Skipped world')
-                            customizable.indexTake = customizable.indexTake + 1
-                            if customizable.indexTake > #storagetake then
+                            table.remove(takeNumeric,i)
+                            if #takeNumeric == 0 then
                                 storageDesc('take','empty')
                             end
                         else
-                            customizable.indexTake = customizable.indexTake + 1
-                            if customizable.indexTake > #storagetake then
-                                customizable.indexTake = 1
-                            end
                             sleep(delaylooping*1000)
                             goto loops
                         end
@@ -479,8 +485,8 @@ takeItem = function()
                     initialize[world] = 'Wrong Door'
                     wrong = false
                     textInfo('','Storage take : '..world..' is wrong door id, Skipped world')
-                    customizable.indexTake = customizable.indexTake + 1
-                    if customizable.indexTake > #storagetake then
+                    table.remove(takeNumeric,i)
+                    if #takeNumeric == 0 then
                         storageDesc('take','empty')
                     end
                 end
@@ -488,8 +494,8 @@ takeItem = function()
                 initialize[world] = 'Nuked'
                 nuked = false
                 textInfo('','Storage take : '..world..' NUKED, Skipped world.')
-                customizable.indexTake = customizable.indexTake + 1
-                if customizable.indexTake > #storagetake then
+                table.remove(takeNumeric,i)
+                if #takeNumeric == 0 then
                     storageDesc('take','empty')
                 end
             end
