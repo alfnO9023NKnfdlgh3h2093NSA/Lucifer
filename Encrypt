@@ -424,12 +424,12 @@ takeItem = function()
                         local count = 0
                         while inventory:getItemCount(pack) < 200 do
                             for _, obj in pairs(bot:getWorld():getObjects()) do
-                                if obj.id == pack and (#bot:getPath(math.floor(obj.x + 10) // 32, math.floor(obj.y + 10) // 32) > 0) then
-                                    bot:findPath(math.floor(obj.x + 10) // 32, math.floor(obj.y + 10) // 32)
+                                if obj.id == pack and (#bot:getPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32) > 0)) then
+                                    bot:findPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
                                     sleep(math.random(100,500))
                                     bot:collect(1)
                                     sleep(math.random(500,1000))
-                                    reconnect(world,door,math.floor(obj.x + 10) // 32, math.floor(obj.y + 10) // 32)
+                                    reconnect(world,door,math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
                                 end
                                 if inventory:getItemCount(pack) >= 200 then
                                     break
