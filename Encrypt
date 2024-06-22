@@ -1,3 +1,4 @@
+
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
@@ -35,6 +36,8 @@ createMessage = function(webhookUrl)
     return getMessageId
 end
 
+local messages = createMessage(linkbotinfo)
+
 itemFloat = function(id)
     return bot:getWorld().growscan:getObjects()[id] or 0
 end
@@ -50,7 +53,9 @@ textInfo = function(case, content)
     printed:append(content)
     clientContent('('..string.upper(bot.name)..') '..content)
     if case == 'stop' then
-        notifications(string.upper(bot.name)..' : '..content)
+        if sendNotif then
+            notifications(string.upper(bot.name)..' : '..content)
+        end
         error(content)
     end
 end
@@ -100,6 +105,22 @@ worldStorage = function(case)
     return str
 end
 
+countStatus = function(case)
+    local count = 0
+    for _, client in pairs(getBots()) do
+        if case == 'offline' then
+            if client.status ~= BotStatus.online then
+                count = count + 1
+            end
+        else
+            if client.status == BotStatus.account_banned then
+                count = count + 1
+            end
+        end
+    end
+    return count
+end
+
 storageInfo = function()
 	if linkbotinfo ~= 'x' then
         local webhook = Webhook.new(linkbotinfo)
@@ -108,19 +129,26 @@ storageInfo = function()
         webhook.embed1.title = 'BOT - '..bot.index..' | Lucifer Move'
         webhook.embed1.color = math.random(111111, 999999)
         webhook.embed1.thumbnail = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077262082068/Hnet.com-image.jpg?ex=661e7947&is=660c0447&hm=e692ab165629d6a84ca2661b5b4a75f97a23cfabb98983fda3270bc2be0e7474&'
-        webhook.embed1.description = '**[GrowID]** : '..bot.name..'\n**[Status]** : '..clientStatic()..'\n**[Current]** : '..bot:getWorld().name
+        webhook.embed1:addField('Bot name', bot.name, true)
+        webhook.embed1:addField('Bot status', clientStatic(), true)
+        webhook.embed1:addField('Bot current', '||'..bot:getWorld().name..'||', true)
+        webhook.embed1:addField('Total Bots', #getBots(), true)
+        webhook.embed1:addField('Total Offline', countStatus('offline'), true)
+        webhook.embed1:addField('Total Banned', countStatus('banned'), true)
         webhook.embed1:addField('Storage Take', worldStorage('take'), true)
         webhook.embed1:addField('Storage Drop', worldStorage('drop'), true)
         webhook.embed1.footer.icon_url = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077706543236/1712025730898.jpg?ex=661e7947&is=660c0447&hm=3be9efe2f0f23456f272149dc0844db884cee12f3b21199b35b2c1287c77a8f2&'
         webhook.embed1.footer.text = 'Updated : '..(os.date('!%a, %b %d %Y at %I:%M %p', os.time() + 7 * 60 * 60))..'\nDeveloped By Caramoy and Made With Luv<3'
-        webhook:edit(createMessage(linkbotinfo))
+        webhook:edit(messages)
     end
 end
 
 clientContent = function(text)
     if webhookstatuslink ~= 'x'  then
         local webhook = Webhook.new(webhookstatuslink)
-        webhook.content = '@everyone'
+        if tagDiscord then
+            webhook.content = '@everyone'
+        end
         webhook.embed1.use = true
         webhook.embed1:addField('', text, false)
         webhook.embed1.footer.text = 'Updated : '..(os.date('!%a %b %d, %Y at %I:%M %p', os.time() + 7 * 60 * 60))..''
