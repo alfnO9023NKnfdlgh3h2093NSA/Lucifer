@@ -11,6 +11,7 @@ local customizable = {
     tileY = 0
 }
 local sleeping = delayexecute * 1000
+local msg = {}
 
 local events = {
     nukeds = function(variant, netid)
@@ -27,16 +28,83 @@ randomSleep = function()
     sleep(math.random(80, 1111))
 end
 
--- credit by Hitoari
-createMessage = function(webhookUrl)
-    local sendWebhook = string.format('powershell -Command "$webhookUrl=\'%s\';$originalMessageContent=\'%s\';$jsonPayload=@{content=$originalMessageContent} | ConvertTo-Json;$response=Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $jsonPayload -ContentType \'application/json\';$response.id"', webhookUrl .. "?wait=true" , "Creating message id for bot - "..bot.index)
-    local getMessageId = io.popen(sendWebhook):read('*a'):match('%s*(.-)%s*$')
-    local editCommand = string.format('powershell -Command "$editUrl=\'%s\';$editedMessageContent=\'%s\';$jsonPayload=@{content=$editedMessageContent} | ConvertTo-Json;$editResponse=Invoke-RestMethod -Uri $editUrl -Method Patch -Body $jsonPayload -ContentType \'application/json\';$editResponse.id"', string.format("%s/messages/%s", webhookUrl, getMessageId), getMessageId)
-    local editedMessageId = io.popen(editCommand):read('*a'):match('%s*(.-)%s*$')
-    return getMessageId
+writeFile = function(path, content)
+    local file = io.open(path .. '.txt', 'a+')
+    if file then
+        file:write(content .. '\n')
+        file:close()
+    end
 end
 
-local messages = createMessage(linkbotinfo)
+createMessageID = function(url, content)
+    if url ~= '' then
+        url = url .. '?wait=1'
+        local http = HttpClient.new()
+        http.url = url
+        http.headers['Content-Type'] = 'application/json'
+        http:setMethod(Method.post)
+        http.content = [[
+        {
+            "username":"Caramoy",
+            "embeds": [
+                {
+                    "title":"]] .. content .. [[",
+                    "color": ]] .. math.random(111111, 999999) .. [[
+                }
+            ]
+        }
+    ]]
+        local result = http:request()
+        if result.error == 0 then
+            local resultData = result.body:match('"id"%s*:%s*"([^"]+)"')
+            if resultData then
+                writeFile('Bot Messages', resultData)
+            end
+            return resultData
+        else
+            print("Request Error: " .. result:getError())
+        end
+        return nil
+    end
+    return nil
+end
+
+fileExists = function(fileName)
+    local file = io.open(fileName, "r")
+    if file then
+        file:close()
+        return true
+    else
+        return false
+    end
+end
+
+deleteFile = function(fileName)
+    local result, reason = os.remove(fileName)
+    if result then
+        print(fileName .. " was deleted successfully.")
+    else
+        print("Error deleting " .. fileName .. ": " .. reason)
+    end                                                                                                             
+end
+
+local fileName = "Bot Messages.txt"
+
+if fileExists(fileName) then
+    deleteFile(fileName)
+end
+
+readFile = function(fileName)
+    local tbl = {}
+    local file = io.open(fileName, 'r')
+    if file then
+        for line in file:lines() do
+            table.insert(tbl, line)
+        end
+        file:close()
+        return tbl
+    end
+end
 
 itemFloat = function(id)
     return bot:getWorld().growscan:getObjects()[id] or 0
@@ -123,23 +191,25 @@ end
 
 storageInfo = function()
 	if linkbotinfo ~= 'x' then
-        local webhook = Webhook.new(linkbotinfo)
-        webhook.embed1.use = true
-        webhook.content = 'Caramoy | Message Bot - '..bot.index
-        webhook.embed1.title = 'BOT - '..bot.index..' | Lucifer Move'
-        webhook.embed1.color = math.random(111111, 999999)
-        webhook.embed1.thumbnail = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077262082068/Hnet.com-image.jpg?ex=661e7947&is=660c0447&hm=e692ab165629d6a84ca2661b5b4a75f97a23cfabb98983fda3270bc2be0e7474&'
-        webhook.embed1:addField('Bot name', bot.name, true)
-        webhook.embed1:addField('Bot status', clientStatic(), true)
-        webhook.embed1:addField('Bot current', '||'..bot:getWorld().name..'||', true)
-        webhook.embed1:addField('Total Bots', #getBots(), true)
-        webhook.embed1:addField('Total Offline', countStatus('offline'), true)
-        webhook.embed1:addField('Total Banned', countStatus('banned'), true)
-        webhook.embed1:addField('Storage Take', worldStorage('take'), true)
-        webhook.embed1:addField('Storage Drop', worldStorage('drop'), true)
-        webhook.embed1.footer.icon_url = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077706543236/1712025730898.jpg?ex=661e7947&is=660c0447&hm=3be9efe2f0f23456f272149dc0844db884cee12f3b21199b35b2c1287c77a8f2&'
-        webhook.embed1.footer.text = 'Updated : '..(os.date('!%a, %b %d %Y at %I:%M %p', os.time() + 7 * 60 * 60))..'\nDeveloped By Caramoy and Made With Luv<3'
-        webhook:edit(messages)
+        for _, messages in pairs(msg) do
+            local webhook = Webhook.new(linkbotinfo)
+            webhook.embed1.use = true
+            webhook.content = 'Caramoy | Message Bot - '..bot.index
+            webhook.embed1.title = 'BOT - '..bot.index..' | Lucifer Move'
+            webhook.embed1.color = math.random(111111, 999999)
+            webhook.embed1.thumbnail = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077262082068/Hnet.com-image.jpg?ex=661e7947&is=660c0447&hm=e692ab165629d6a84ca2661b5b4a75f97a23cfabb98983fda3270bc2be0e7474&'
+            webhook.embed1:addField('Bot name', bot.name, true)
+            webhook.embed1:addField('Bot status', clientStatic(), true)
+            webhook.embed1:addField('Bot current', '||'..bot:getWorld().name..'||', true)
+            webhook.embed1:addField('Total Bots', #getBots(), true)
+            webhook.embed1:addField('Total Offline', countStatus('offline'), true)
+            webhook.embed1:addField('Total Banned', countStatus('banned'), true)
+            webhook.embed1:addField('Storage Take', worldStorage('take'), true)
+            webhook.embed1:addField('Storage Drop', worldStorage('drop'), true)
+            webhook.embed1.footer.icon_url = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077706543236/1712025730898.jpg?ex=661e7947&is=660c0447&hm=3be9efe2f0f23456f272149dc0844db884cee12f3b21199b35b2c1287c77a8f2&'
+            webhook.embed1.footer.text = 'Updated : '..(os.date('!%a, %b %d %Y at %I:%M %p', os.time() + 7 * 60 * 60))..'\nDeveloped By Caramoy and Made With Luv<3'
+            webhook:edit(messages)
+        end
     end
 end
 
@@ -598,6 +668,14 @@ end
 if Information == 'Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq' and scriptVersion == 'final_version[0.1]' then
     clientStatus()
     sleep(bot.index * sleeping)
+    if linkbotinfo ~= 'x' then
+        createMessageID(linkbotinfo, 'Creating message ID for Bot - '..bot.index)
+        local readMsg = readFile('Bot Messages.txt')
+        local indexMsg = 1
+        for i = 1, indexMsg do
+            table.insert(msg, readMsg[math.floor((getBot().index - 1) * indexMsg + i)])
+        end
+    end
     storageInfo()
     while true do
         takeItem()
