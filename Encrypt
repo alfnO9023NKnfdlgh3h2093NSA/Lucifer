@@ -1,9 +1,7 @@
-
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
 
-bot.collect_range = 3
 bot.auto_reconnect = true
 initialize = {}
 local customizable = {
@@ -591,7 +589,6 @@ takeItem = function()
         parts = split(takeNumeric[i], '[^|]+')
         world, door = parts[1], parts[2]
         warp(world, door)
-        bot.auto_collect = true
         if not nuked then
             if not wrong then
                 storageInfo()
@@ -611,17 +608,10 @@ takeItem = function()
                 else
                     for _, pack in pairs(itemId) do
                         local count = 0
-                        while inventory:getItemCount(pack) < 200 do
-                            for _, obj in pairs(bot:getWorld():getObjects()) do
-                                if obj.id == pack and (#bot:getPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32) > 0)) then
-                                    bot:findPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
-                                    sleep(100)
-                                    reconnect(world, door, math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
-                                end
-                                if inventory:getItemCount(pack) >= 200 then
-                                    break
-                                end
-                            end
+                        while inventory:getItemCount(pack) < minimumItem do
+                            bot:collectByID(pack)
+                            sleep(100)
+                            reconnect(world, door)
                             count = count + 1
                             if count == 50 then
                                 count = 0
@@ -661,7 +651,6 @@ takeItem = function()
             end
         end
     end
-    bot.auto_collect = false
     initialize[world] = ''..itemFloat(itemId[1])..'x'
 end
 
