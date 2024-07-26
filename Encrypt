@@ -1,4 +1,3 @@
-
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
@@ -609,10 +608,12 @@ takeItem = function()
                     end
                 else
                     for i, pack in pairs(itemId) do
-                        while inventory:getItemCount(pack) < minimumItem do
+                        local count = 0
+                        while inventory:getItemCount(pack) < minimumItem and count < 50 do
                             bot:collectByID(pack)
                             sleep(100)
                             reconnect(world, door)
+                            count = count + 1
                         end
                     end
                     sleep(100)
