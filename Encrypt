@@ -1,8 +1,10 @@
+
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
 
 bot.auto_reconnect = true
+bot.collect_range = 2
 initialize = {}
 local customizable = {
     tileX = 0, 
@@ -380,6 +382,7 @@ dropItem = function()
         parts = split(dropNumeric[i], '[^|]+')
         world, door = parts[1], parts[2]
         warp(world, door)
+        bot.auto_collect = false
         if not nuked then
             if not wrong then
                 storageInfo()
@@ -589,8 +592,10 @@ takeItem = function()
         parts = split(takeNumeric[i], '[^|]+')
         world, door = parts[1], parts[2]
         warp(world, door)
+        bot.auto_collect = true
         if not nuked then
             if not wrong then
+                initialize[world] = ''..itemFloat(itemId[1])..'x'
                 storageInfo()
                 if itemFloat(itemId[1]) < minimumFloat then
                     initialize[world] = ''..itemFloat(itemId[1])..'x [EMPTY]'
@@ -606,25 +611,11 @@ takeItem = function()
                         goto back
                     end
                 else
-                    for _, pack in pairs(itemId) do
-                        local count = 0
+                    for i, pack in pairs(itemId) do
                         while inventory:getItemCount(pack) < minimumItem do
                             bot:collectByID(pack)
                             sleep(100)
                             reconnect(world, door)
-                            count = count + 1
-                            if count == 50 then
-                                count = 0
-                                if not looping then
-                                    table.remove(takeNumeric, i)
-                                    textInfo('', 'No more items at '..world..', world skipped')
-                                    if #takeNumeric == 0 then
-                                        botLeave()
-                                        textInfo('stop', 'All storage take are empty')
-                                    end
-                                end
-                                goto back
-                            end
                         end
                     end
                     sleep(100)
@@ -651,7 +642,6 @@ takeItem = function()
             end
         end
     end
-    initialize[world] = ''..itemFloat(itemId[1])..'x'
 end
 
 if Information == 'Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq' and scriptVersion == 'final_version[0.1]' then
