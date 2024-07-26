@@ -4,7 +4,6 @@ local inventory = getBot():getInventory()
 local printed = getBot():getLog()
 
 bot.auto_reconnect = true
-bot.collect_range = 2
 initialize = {}
 local customizable = {
     tileX = 0, 
@@ -382,7 +381,6 @@ dropItem = function()
         parts = split(dropNumeric[i], '[^|]+')
         world, door = parts[1], parts[2]
         warp(world, door)
-        bot.auto_collect = false
         if not nuked then
             if not wrong then
                 storageInfo()
@@ -592,7 +590,6 @@ takeItem = function()
         parts = split(takeNumeric[i], '[^|]+')
         world, door = parts[1], parts[2]
         warp(world, door)
-        bot.auto_collect = true
         if not nuked then
             if not wrong then
                 initialize[world] = ''..itemFloat(itemId[1])..'x'
