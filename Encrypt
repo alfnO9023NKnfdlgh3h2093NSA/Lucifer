@@ -1,6 +1,7 @@
 local bot = getBot()
-local inventory = getBot():getInventory()
-local printed = getBot():getLog()
+
+inventory = bot:getInventory()
+printed = bot:getLog()
 
 bot.auto_reconnect = true
 initialize = {}
@@ -9,7 +10,8 @@ local customizable = {
     tileY = 0
 }
 local sleeping = delayexecute * 1000
-local msg = {}
+local takeMsg = {}
+local dropMsg = {}
 
 local events = {
     nukeds = function(variant, netid)
@@ -34,7 +36,7 @@ writeFile = function(path, content)
     end
 end
 
-createMessageID = function(url, content)
+createMessageID = function(url, content, fileNames)
     if url ~= '' then
         url = url .. '?wait=1'
         local http = HttpClient.new()
@@ -56,7 +58,7 @@ createMessageID = function(url, content)
         if result.error == 0 then
             local resultData = result.body:match('"id"%s*:%s*"([^"]+)"')
             if resultData then
-                writeFile('Bot Messages', resultData)
+                writeFile(fileNames, resultData)
             end
             return resultData
         else
@@ -86,10 +88,15 @@ deleteFile = function(fileName)
     end                                                                                                             
 end
 
-local fileName = "Bot Messages.txt"
+strgTake = "StorageTake.txt"
+strgDrop = "StorageDrop.txt"
 
-if fileExists(fileName) then
-    deleteFile(fileName)
+if fileExists(strgTake) then
+    deleteFile(strgTake)
+end
+
+if fileExists(strgDrop) then
+    deleteFile(strgDrop)
 end
 
 readFile = function(fileName)
@@ -125,6 +132,15 @@ textInfo = function(case, content)
         error(content)
     end
 end
+
+scanObjects = function()
+    local growscan = getBot():getWorld().growscan
+    local str = ''
+    for id, count in pairs(growscan:getObjects()) do
+        str = str.."\n".. getInfo(id).name.." : "..count..' x'
+    end
+    return str
+end    
 
 split = function(str, ptr)
     if not ptr then
@@ -187,23 +203,35 @@ countStatus = function(case)
     return count
 end
 
-storageInfo = function()
-	if linkbotinfo ~= 'x' then
-        for _, messages in pairs(msg) do
-            local webhook = Webhook.new(linkbotinfo)
+webhookTake = function()
+	if storagesInfo ~= 'x' then
+        for _, messages in pairs(takeMsg) do
+            local webhook = Webhook.new(storagesInfo)
             webhook.embed1.use = true
-            webhook.content = 'Caramoy | Message Bot - '..bot.index
-            webhook.embed1.title = 'BOT - '..bot.index..' | Lucifer Move'
+            webhook.embed1.title = 'Storage Take | INFO'
             webhook.embed1.color = math.random(111111, 999999)
             webhook.embed1.thumbnail = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077262082068/Hnet.com-image.jpg?ex=661e7947&is=660c0447&hm=e692ab165629d6a84ca2661b5b4a75f97a23cfabb98983fda3270bc2be0e7474&'
-            webhook.embed1:addField('Bot name', bot.name, true)
-            webhook.embed1:addField('Bot status', clientStatic(), true)
-            webhook.embed1:addField('Bot current', '||'..bot:getWorld().name..'||', true)
-            webhook.embed1:addField('Total Bots', #getBots(), true)
-            webhook.embed1:addField('Total Offline', countStatus('offline'), true)
-            webhook.embed1:addField('Total Banned', countStatus('banned'), true)
-            webhook.embed1:addField('Storage Take', worldStorage('take'), true)
-            webhook.embed1:addField('Storage Drop', worldStorage('drop'), true)
+            webhook.embed1:addField('', bot.name..' ('..bot:getWorld().name..')', false)
+            webhook.embed1:addField('Storage', worldStorage('take'), false)
+            webhook.embed1:addField('Object Detected',scanObjects(), false)
+            webhook.embed1.footer.icon_url = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077706543236/1712025730898.jpg?ex=661e7947&is=660c0447&hm=3be9efe2f0f23456f272149dc0844db884cee12f3b21199b35b2c1287c77a8f2&'
+            webhook.embed1.footer.text = 'Updated : '..(os.date('!%a, %b %d %Y at %I:%M %p', os.time() + 7 * 60 * 60))..'\nDeveloped By Caramoy and Made With Luv<3'
+            webhook:edit(messages)
+        end
+    end
+end
+
+webhookDrop = function()
+	if storagesInfo ~= 'x' then
+        for _, messages in pairs(dropMsg) do
+            local webhook = Webhook.new(storagesInfo)
+            webhook.embed1.use = true
+            webhook.embed1.title = 'Storage Drop | INFO'
+            webhook.embed1.color = math.random(111111, 999999)
+            webhook.embed1.thumbnail = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077262082068/Hnet.com-image.jpg?ex=661e7947&is=660c0447&hm=e692ab165629d6a84ca2661b5b4a75f97a23cfabb98983fda3270bc2be0e7474&'
+            webhook.embed1:addField('', bot.name..' ('..bot:getWorld().name..')', false)
+            webhook.embed1:addField('Storage', worldStorage('drop'), false)
+            webhook.embed1:addField('Object Detected',scanObjects(), false)
             webhook.embed1.footer.icon_url = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077706543236/1712025730898.jpg?ex=661e7947&is=660c0447&hm=3be9efe2f0f23456f272149dc0844db884cee12f3b21199b35b2c1287c77a8f2&'
             webhook.embed1.footer.text = 'Updated : '..(os.date('!%a, %b %d %Y at %I:%M %p', os.time() + 7 * 60 * 60))..'\nDeveloped By Caramoy and Made With Luv<3'
             webhook:edit(messages)
@@ -212,8 +240,8 @@ storageInfo = function()
 end
 
 clientContent = function(text)
-    if webhookstatuslink ~= 'x'  then
-        local webhook = Webhook.new(webhookstatuslink)
+    if botStatusWebhook ~= 'x'  then
+        local webhook = Webhook.new(botStatusWebhook)
         if tagDiscord then
             webhook.content = '@everyone'
         end
@@ -226,7 +254,6 @@ end
 
 updateStatusInfo = function()
     textInfo('', 'status is ' .. clientStatic() .. ', Current: ' .. getWorld().name)
-    storageInfo()
 end
 
 clientStatus = function()
@@ -287,20 +314,12 @@ warp = function(world, door)
         name = name .. '|' ..door
     end
     if not bot:isInWorld(world:upper()) then
-        local count = 0
         addEvent(Event.variantlist, events.nukeds)
         while not bot:isInWorld(world:upper()) and not nuked do
             clientStatus()
             bot:warp(name)
             listenEvents(5)
             sleep(delaywarp * 1000)
-            count = count + 1
-            if count == 25 then
-                count = 0
-                textInfo('', ': Maybe hard warp?, disconnecting bot and sleeping for '..delayidiotserver..' minutes')
-                bot:disconnect()
-                sleep(delayidiotserver * 60000)
-            end
         end
         removeEvents()
     end
@@ -382,7 +401,7 @@ dropItem = function()
         warp(world, door)
         if not nuked then
             if not wrong then
-                storageInfo()
+                webhookDrop()
                 randomSleep()
                 clientStatus()
                 if itemFloat(itemId[1]) < limit then
@@ -421,7 +440,7 @@ dropItem = function()
                                             sleep(100)
                                             reconnect(world, door, tile.x + (y - 1), tile.y - customizable.tileY)
                                             if tile.y - customizable.tileY == 0 then
-                                                initialize[world] = '' .. itemFloat(itemId[1]) .. 'x [Drop Failed]'
+                                                initialize[world] = ' [Drop Failed]'
                                                 botLeave()
                                                 textInfo('stop', 'Drop failed, bot at 0 y coordinate')
                                             end
@@ -492,7 +511,7 @@ dropItem = function()
                                             sleep(100)
                                             reconnect(world, door, coorX + (y - 1), coorY - customizable.tileY)
                                             if coorY - customizable.tileY == 0 then
-                                                initialize[world] = '' .. itemFloat(itemId[1]) .. 'x [Drop Failed]'
+                                                initialize[world] = '[Drop Failed]'
                                                 botLeave()
                                                 textInfo('stop', 'Drop failed, bot at 0 y coordinate')
                                             end
@@ -543,7 +562,7 @@ dropItem = function()
                     sleep(100)
                     break
                 else
-                    initialize[world] = '' .. itemFloat(itemId[1]) .. 'x [LIMIT]'
+                    initialize[world] = '[LIMIT]'
                     textInfo('', 'Storage drop : ' .. world .. ' has reached limit, Skipped world')
                     table.remove(dropNumeric, i)
                     customizable.tileX = 0
@@ -578,10 +597,17 @@ dropItem = function()
             end
         end
     end
-    initialize[world] = '' .. itemFloat(itemId[1]) .. 'x'
 end
 
 takeItem = function()
+    local function scanning()
+        for v, value in pairs(itemId) do
+            if itemFloat(value) == 0 then
+                return true
+            end
+        end
+        return false
+    end
     ::back::
     printed:append('Take Item')
     takeNumeric = shuffle(takeNumeric)
@@ -591,32 +617,35 @@ takeItem = function()
         warp(world, door)
         if not nuked then
             if not wrong then
-                initialize[world] = ''..itemFloat(itemId[1])..'x'
-                storageInfo()
-                if itemFloat(itemId[1]) < minimumFloat then
-                    initialize[world] = ''..itemFloat(itemId[1])..'x [EMPTY]'
+                webhookTake()
+                if scanning() then
+                    initialize[world] = '[EMPTY]'
                     if not looping then
                         textInfo('', 'Storage take : '..world..' are empty, Skipped world')
                         table.remove(takeNumeric, i)
                         if #takeNumeric == 0 then
+                            initialize[world] = '[All storage take are empty]'
+                            webhookTake()
                             botLeave()
                             textInfo('stop', 'All storage take are empty')
+                        else
+                            goto back
                         end
                     else
                         sleep(delaylooping*1000)
                         goto back
                     end
                 else
-                    for i, pack in pairs(itemId) do
-                        while inventory:getItemCount(pack) < minimumItem and itemFloat(pack) >= minimumFloat do
-                            bot:collectByID(pack)
+                    for _, value in pairs(itemId) do
+                        while inventory:getItemCount(value) ~= 200 and itemFloat(value) ~= 0 do
+                            bot:collectByID(value)
                             sleep(100)
                             reconnect(world, door)
                         end
                     end
-                    sleep(100)
-                    break
                 end
+                sleep(100)
+                break
             else
                 initialize[world] = 'Wrong'
                 wrong = false
@@ -640,18 +669,27 @@ takeItem = function()
     end
 end
 
+creatingForMessage = function()
+    if bot.index == 1 then
+        createMessageID(storagesInfo, 'Creating message for Storage Take', 'StorageTake')
+        createMessageID(storagesInfo, 'Creating message for Storage Drop', 'StorageDrop')
+    end
+    local takes = readFile('StorageTake.txt')
+    local drops = readFile('StorageDrop.txt')
+    for _, value in pairs(takes) do
+        table.insert(takeMsg, value)
+    end
+    for _, values in pairs(drops) do
+        table.insert(dropMsg, values)
+    end
+end
+
 if Information == 'Script Move WTW made by Caramoy Syndicate, Link Server : https://discord.com/invite/fTTKW8vvuq' and scriptVersion == 'final_version[0.1]' then
     clientStatus()
     sleep(bot.index * sleeping)
-    if linkbotinfo ~= 'x' then
-        createMessageID(linkbotinfo, 'Creating message ID for Bot - '..bot.index)
-        local readMsg = readFile('Bot Messages.txt')
-        local indexMsg = 1
-        for i = 1, indexMsg do
-            table.insert(msg, readMsg[math.floor((getBot().index - 1) * indexMsg + i)])
-        end
+    if storagesInfo ~= 'x' then
+        creatingForMessage()
     end
-    storageInfo()
     while true do
         takeItem()
         dropItem()
